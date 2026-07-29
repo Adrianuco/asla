@@ -1,0 +1,27 @@
+# React
+node_modules/
+dist/
+npm-debug.log*
+
+# .NET
+bin/
+obj/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+
+# VS Code
+.vscode/
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# Environment files
+.env
+.env.*

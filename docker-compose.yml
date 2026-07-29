@@ -1,0 +1,3 @@
+# docker-compose.yml
+# Configuración de Docker para el entorno de desarrollo.
+# Aquí se añadirá posteriormente el contenedor de SQL Server.
