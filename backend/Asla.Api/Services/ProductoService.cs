@@ -15,14 +15,20 @@ public class ProductoService
 
     public async Task<List<Producto>> GetProductos()
     {
-        // se agrega el Include para que EF haga un join con la tabla de categorias 
-        // y traiga la información de la categoria asociada a cada producto
-        return await _context.Productos.Include(p => p.Categoria).ToListAsync();
+        return await _context.Productos
+            .Include(p => p.Categoria)
+            .Include(p => p.Productora)
+            .Include(p => p.UnidadMedida)
+            .ToListAsync();
     }
 
     public async Task<Producto?> GetProductoById(int id)
     {
-        return await _context.Productos.Include(p => p.Categoria).FirstOrDefaultAsync(p => p.ProductoId == id);
+        return await _context.Productos
+            .Include(p => p.Categoria)
+            .Include(p => p.Productora)
+            .Include(p => p.UnidadMedida)
+            .FirstOrDefaultAsync(p => p.ProductoId == id);
     }
 
     public async Task<Producto> CreateProducto(Producto producto)
@@ -36,15 +42,13 @@ public class ProductoService
     {
         var producto = await _context.Productos.FirstOrDefaultAsync(p => p.ProductoId == id);
 
-        if(producto == null)
+        if (producto == null)
         {
             return false;
         }
 
         _context.Productos.Remove(producto);
-
         await _context.SaveChangesAsync();
-
         return true;
     }
 
@@ -52,16 +56,23 @@ public class ProductoService
     {
         var productoExistente = await _context.Productos.FirstOrDefaultAsync(p => p.ProductoId == id);
 
-        if(productoExistente == null)
+        if (productoExistente == null)
         {
             return false;
         }
 
         productoExistente.Nombre = producto.Nombre;
+        productoExistente.Descripcion = producto.Descripcion;
         productoExistente.Precio = producto.Precio;
+        productoExistente.PermiteVenta = producto.PermiteVenta;
+        productoExistente.PermiteTrueque = producto.PermiteTrueque;
+        productoExistente.FechaPublicacion = producto.FechaPublicacion;
+        productoExistente.Estado = producto.Estado;
+        productoExistente.CategoriaId = producto.CategoriaId;
+        productoExistente.UnidadMedidaId = producto.UnidadMedidaId;
+        productoExistente.ProductoraId = producto.ProductoraId;
 
         await _context.SaveChangesAsync();
-
         return true;
     }
 }

@@ -25,6 +25,13 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 // inyeccion de dependencias para los services
 builder.Services.AddScoped<ProductoService>();
 builder.Services.AddScoped<CategoriaService>();
+builder.Services.AddScoped<RolService>();
+builder.Services.AddScoped<UsuarioService>();
+builder.Services.AddScoped<UbicacionService>();
+builder.Services.AddScoped<ProductoraService>();
+builder.Services.AddScoped<UnidadMedidaService>();
+builder.Services.AddScoped<CarritoService>();
+builder.Services.AddScoped<DetalleCarritoService>();
 
 var app = builder.Build();
 
