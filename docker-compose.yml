@@ -1,3 +1,14 @@
-# docker-compose.yml
-# Configuración de Docker para el entorno de desarrollo.
-# Aquí se añadirá posteriormente el contenedor de SQL Server.
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: asla-sqlserver
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "sql@12345."
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+
+volumes:
+  sqlserver_data:
