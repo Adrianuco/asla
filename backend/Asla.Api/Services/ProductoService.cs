@@ -22,7 +22,7 @@ public class ProductoService
 
     public async Task<Producto?> GetProductoById(int id)
     {
-        return await _context.Productos.Include(p => p.Categoria).FirstOrDefaultAsync(p => p.Id == id);
+        return await _context.Productos.Include(p => p.Categoria).FirstOrDefaultAsync(p => p.ProductoId == id);
     }
 
     public async Task<Producto> CreateProducto(Producto producto)
@@ -34,7 +34,7 @@ public class ProductoService
 
     public async Task<bool> DeleteProducto(int id)
     {
-        var producto = await _context.Productos.FirstOrDefaultAsync(p => p.Id == id);
+        var producto = await _context.Productos.FirstOrDefaultAsync(p => p.ProductoId == id);
 
         if(producto == null)
         {
@@ -50,7 +50,7 @@ public class ProductoService
 
     public async Task<bool> UpdateProducto(int id, Producto producto)
     {
-        var productoExistente = await _context.Productos.FirstOrDefaultAsync(p => p.Id == id);
+        var productoExistente = await _context.Productos.FirstOrDefaultAsync(p => p.ProductoId == id);
 
         if(productoExistente == null)
         {
@@ -59,7 +59,6 @@ public class ProductoService
 
         productoExistente.Nombre = producto.Nombre;
         productoExistente.Precio = producto.Precio;
-        productoExistente.Stock = producto.Stock;
 
         await _context.SaveChangesAsync();
 
