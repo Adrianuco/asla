@@ -30,6 +30,13 @@ builder.Services.AddScoped<PedidoService>();
 builder.Services.AddScoped<DetallePedidoService>();
 builder.Services.AddScoped<TruequeService>();
 builder.Services.AddScoped<DetalleTruequeService>();
+builder.Services.AddScoped<RolService>();
+builder.Services.AddScoped<UsuarioService>();
+builder.Services.AddScoped<UbicacionService>();
+builder.Services.AddScoped<ProductoraService>();
+builder.Services.AddScoped<UnidadMedidaService>();
+builder.Services.AddScoped<CarritoService>();
+builder.Services.AddScoped<DetalleCarritoService>();
 
 var app = builder.Build();
 

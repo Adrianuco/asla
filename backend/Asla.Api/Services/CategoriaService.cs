@@ -34,15 +34,13 @@ public class CategoriaService
     {
         var categoria = await _context.Categorias.FirstOrDefaultAsync(c => c.CategoriaId == id);
 
-        if(categoria == null)
+        if (categoria == null)
         {
             return false;
         }
 
         _context.Categorias.Remove(categoria);
-
         await _context.SaveChangesAsync();
-
         return true;
     }
 
@@ -50,15 +48,16 @@ public class CategoriaService
     {
         var categoriaExistente = await _context.Categorias.FirstOrDefaultAsync(c => c.CategoriaId == id);
 
-        if(categoriaExistente == null)
+        if (categoriaExistente == null)
         {
             return false;
         }
 
         categoriaExistente.Nombre = categoria.Nombre;
+        categoriaExistente.Descripcion = categoria.Descripcion;
+        categoriaExistente.Estado = categoria.Estado;
 
         await _context.SaveChangesAsync();
-
         return true;
     }
 }
