@@ -90,6 +90,20 @@ public class AppDbContext : DbContext
             .WithMany(c => c.Detalles)
             .HasForeignKey(d => d.CarritoId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        // Relación N:N Productora - Etiqueta
+        modelBuilder.Entity<ProductoraEtiqueta>()
+            .HasKey(pe => new { pe.ProductoraId, pe.EtiquetaId });
+
+        modelBuilder.Entity<ProductoraEtiqueta>()
+            .HasOne(pe => pe.Productora)
+            .WithMany(p => p.ProductoraEtiquetas)
+            .HasForeignKey(pe => pe.ProductoraId);
+
+        modelBuilder.Entity<ProductoraEtiqueta>()
+            .HasOne(pe => pe.Etiqueta)
+            .WithMany(e => e.ProductoraEtiquetas)
+            .HasForeignKey(pe => pe.EtiquetaId);
     }
     // permite a EF administrar estas entidades
     public DbSet<Producto> Productos { get; set; }
@@ -106,4 +120,6 @@ public class AppDbContext : DbContext
     public DbSet<DetalleTrueque> DetallesTrueque { get; set; }
     public DbSet<Carrito> Carritos { get; set; }
     public DbSet<DetalleCarrito> DetallesCarrito { get; set; }
+    public DbSet<Etiqueta> Etiquetas { get; set; }
+    public DbSet<ProductoraEtiqueta> ProductoraEtiquetas { get; set; }
 }

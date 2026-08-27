@@ -1,3 +1,4 @@
+using Asla.Api.DTOs.Usuario;
 using Asla.Api.Models;
 using Asla.Api.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -18,47 +19,47 @@ public class UsuarioController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetUsuarios()
     {
-        var usuarios = await _service.GetUsuarios();
+        var usuarios = await _service.GetUsuariosAsync();
         return Ok(usuarios);
     }
 
-    [HttpGet("{id}")]
-    public async Task<IActionResult> GetUsuarioById(int id)
+    [HttpGet("{id}/perfil")]
+    public async Task<ActionResult<PerfilDto>> GetPerfilUsuario(int id)
     {
-        var usuario = await _service.GetUsuarioById(id);
-        if (usuario == null)
+        var perfil = await _service.GetPerfilUsuarioAsync(id);
+        if (perfil == null)
         {
             return NotFound();
         }
-        return Ok(usuario);
+        return Ok(perfil);
+    }
+
+    [HttpPut("{id}/perfil")]
+    public async Task<IActionResult> UpdatePerfilUsuario(int id, ActualizarPerfilDto dto)
+    {
+        var actualizado = await _service.UpdatePerfilUsuarioAsync(id, dto);
+        if (!actualizado)
+        {
+            return NotFound();
+        }
+        return NoContent();
     }
 
     [HttpPost]
     public async Task<IActionResult> CreateUsuario(Usuario usuario)
     {
-        var nuevoUsuario = await _service.CreateUsuario(usuario);
+        var nuevoUsuario = await _service.CreateUsuarioAsync(usuario);
         return Ok(nuevoUsuario);
-    }
-
-    [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateUsuario(int id, Usuario usuario)
-    {
-        var actualizado = await _service.UpdateUsuario(id, usuario);
-        if (!actualizado)
-        {
-            return NotFound();
-        }
-        return Ok();
     }
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteUsuario(int id)
     {
-        var resultado = await _service.DeleteUsuario(id);
+        var resultado = await _service.DeleteUsuarioAsync(id);
         if (!resultado)
         {
             return NotFound();
         }
-        return Ok();
+        return NoContent();
     }
 }
