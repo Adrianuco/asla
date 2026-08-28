@@ -1,5 +1,4 @@
-﻿using Asla.Api.Models;
-using Asla.Api.Services;
+﻿using Asla.Api.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Asla.Api.Controllers;
@@ -16,54 +15,21 @@ public class DetalleTruequeController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetDetalleTrueques()
+    public async Task<IActionResult> GetDetalles([FromQuery] int? truequeId)
     {
-        var detalleTrueques = await _service.GetDetalleTrueques();
-
-        return Ok(detalleTrueques);
+        var detalles = await _service.GetDetalles(truequeId);
+        return Ok(detalles);
     }
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetDetalleTruequeById(int id)
+    public async Task<IActionResult> GetDetalleById(int id)
     {
-        var detalleTrueque = await _service.GetDetalleTruequeById(id);
-
-        if (detalleTrueque == null)
+        var detalle = await _service.GetDetalleById(id);
+        if (detalle == null)
         {
-            return NotFound();
+            return NotFound(new { mensaje = $"No se encontró el detalle de trueque con ID {id}." });
         }
 
-        return Ok(detalleTrueque);
-    }
-
-    [HttpPost]
-    public async Task<IActionResult> CreateDetalleTrueque(DetalleTrueque detalleTrueque)
-    {
-        var nuevoDetalleTrueque = await _service.CreateDetalleTrueque(detalleTrueque);
-        return Ok(nuevoDetalleTrueque);
-    }
-
-    [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateDetalleTrueque(int id, DetalleTrueque detalleTrueque)
-    {
-        var actualizado = await _service.UpdateDetalleTrueque(id, detalleTrueque);
-        if (!actualizado)
-        {
-            return NotFound();
-        }
-        return Ok();
-    }
-
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteDetalleTrueque(int id)
-    {
-        var resultado = await _service.DeleteDetalleTrueque(id);
-
-        if (!resultado)
-        {
-            return NotFound();
-        }
-
-        return Ok();
+        return Ok(detalle);
     }
 }

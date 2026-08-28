@@ -15,8 +15,8 @@ public class Productora
     public bool Estado { get; set; }
 
     // Navegación
-    public Usuario Usuario { get; set; } = null!;
-    public Ubicacion Ubicacion { get; set; } = null!;
+    public Usuario? Usuario { get; set; }
+    public Ubicacion? Ubicacion { get; set; }
 
     // Relaciones (1:N)
     [JsonIgnore]
