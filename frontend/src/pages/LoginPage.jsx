@@ -1,6 +1,8 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { FaLock, FaUser, FaEye, FaEyeSlash, FaLeaf, FaSeedling, FaShieldAlt } from "react-icons/fa";
+import { FaLock, FaUser, FaEye, FaEyeSlash, FaSeedling, FaShieldAlt } from "react-icons/fa";
+import aslaLogo from "../assets/asla-logo.svg";
 
 export default function LoginPage() {
   const { login, loginDemo, cargando } = useAuth();
@@ -54,21 +56,18 @@ export default function LoginPage() {
           alignItems: "center",
           gap: "10px"
         }}>
-          {/* Logo Asla en Círculo Rosa */}
-          <div style={{
-            width: "68px",
-            height: "68px",
-            borderRadius: "var(--radius-full)",
-            backgroundColor: "var(--color-primary-light)",
-            color: "var(--color-primary)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: "32px",
-            boxShadow: "0 4px 14px rgba(225, 45, 134, 0.18)"
-          }}>
-            <FaLeaf />
-          </div>
+          {/* Logo Oficial ASLA */}
+          <img
+            src={aslaLogo}
+            alt="Logo ASLA"
+            style={{
+              width: "72px",
+              height: "72px",
+              objectFit: "contain",
+              borderRadius: "14px",
+              boxShadow: "0 4px 14px rgba(0, 0, 0, 0.08)"
+            }}
+          />
 
           {/* Nombre de la Aplicación */}
           <h1 style={{
@@ -127,7 +126,7 @@ export default function LoginPage() {
               <span style={{
                 position: "absolute",
                 left: "16px",
-                color: "var(--color-text-muted)",
+                color: "var(--color-secondary)",
                 fontSize: "15px",
                 display: "flex",
                 alignItems: "center"
@@ -145,8 +144,8 @@ export default function LoginPage() {
                   paddingRight: "16px",
                   height: "48px",
                   borderRadius: "var(--radius-full)",
-                  border: "1.5px solid var(--color-border)",
-                  backgroundColor: "#F8FAFC",
+                  border: "1.5px solid rgba(39, 192, 100, 0.35)",
+                  backgroundColor: "var(--color-secondary-light)",
                   fontSize: "0.95rem",
                   color: "var(--color-text-main)",
                   outline: "none",
@@ -171,7 +170,7 @@ export default function LoginPage() {
               <span style={{
                 position: "absolute",
                 left: "16px",
-                color: "var(--color-text-muted)",
+                color: "var(--color-secondary)",
                 fontSize: "15px",
                 display: "flex",
                 alignItems: "center"
@@ -189,8 +188,8 @@ export default function LoginPage() {
                   paddingRight: "46px",
                   height: "48px",
                   borderRadius: "var(--radius-full)",
-                  border: "1.5px solid var(--color-border)",
-                  backgroundColor: "#F8FAFC",
+                  border: "1.5px solid rgba(39, 192, 100, 0.35)",
+                  backgroundColor: "var(--color-secondary-light)",
                   fontSize: "0.95rem",
                   color: "var(--color-text-main)",
                   outline: "none",
@@ -206,7 +205,7 @@ export default function LoginPage() {
                   right: "14px",
                   background: "transparent",
                   border: "none",
-                  color: "var(--color-text-muted)",
+                  color: "var(--color-secondary)",
                   padding: "6px",
                   display: "flex",
                   alignItems: "center",
@@ -218,6 +217,26 @@ export default function LoginPage() {
                 {mostrarPassword ? <FaEyeSlash /> : <FaEye />}
               </button>
             </div>
+          </div>
+
+          {/* Enlace al Registro */}
+          <div style={{
+            textAlign: "center",
+            fontSize: "0.88rem",
+            color: "var(--color-text-muted)",
+            marginTop: "4px"
+          }}>
+            ¿No tienes una cuenta?{" "}
+            <Link
+              to="/registro-productora"
+              style={{
+                color: "var(--color-primary)",
+                fontWeight: "700",
+                textDecoration: "none"
+              }}
+            >
+              Regístrate
+            </Link>
           </div>
 
           {/* Botón Principal: INGRESAR */}

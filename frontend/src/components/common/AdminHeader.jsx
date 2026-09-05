@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import { FaSignOutAlt, FaLeaf } from "react-icons/fa";
+import { FaSignOutAlt } from "react-icons/fa";
 
 export default function AdminHeader() {
   const { logout } = useAuth();
@@ -26,19 +26,6 @@ export default function AdminHeader() {
             color: "#ffffff"
           }}
         >
-          <div style={{
-            width: "38px",
-            height: "38px",
-            borderRadius: "var(--radius-full)",
-            backgroundColor: "rgba(255, 255, 255, 0.22)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: "19px",
-            color: "#ffffff"
-          }}>
-            <FaLeaf />
-          </div>
           <span style={{
             fontSize: "1.45rem",
             fontWeight: "800",
