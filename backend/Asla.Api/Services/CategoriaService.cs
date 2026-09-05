@@ -20,7 +20,7 @@ public class CategoriaService
 
     public async Task<Categoria?> GetCategoriaById(int id)
     {
-        return await _context.Categorias.FirstOrDefaultAsync(c => c.Id == id);
+        return await _context.Categorias.FirstOrDefaultAsync(c => c.CategoriaId == id);
     }
 
     public async Task<Categoria> CreateCategoria(Categoria categoria)
@@ -32,33 +32,32 @@ public class CategoriaService
 
     public async Task<bool> DeleteCategoria(int id)
     {
-        var categoria = await _context.Categorias.FirstOrDefaultAsync(c => c.Id == id);
+        var categoria = await _context.Categorias.FirstOrDefaultAsync(c => c.CategoriaId == id);
 
-        if(categoria == null)
+        if (categoria == null)
         {
             return false;
         }
 
         _context.Categorias.Remove(categoria);
-
         await _context.SaveChangesAsync();
-
         return true;
     }
 
     public async Task<bool> UpdateCategoria(int id, Categoria categoria)
     {
-        var categoriaExistente = await _context.Categorias.FirstOrDefaultAsync(c => c.Id == id);
+        var categoriaExistente = await _context.Categorias.FirstOrDefaultAsync(c => c.CategoriaId == id);
 
-        if(categoriaExistente == null)
+        if (categoriaExistente == null)
         {
             return false;
         }
 
         categoriaExistente.Nombre = categoria.Nombre;
+        categoriaExistente.Descripcion = categoria.Descripcion;
+        categoriaExistente.Estado = categoria.Estado;
 
         await _context.SaveChangesAsync();
-
         return true;
     }
 }

@@ -1,6 +1,6 @@
 # Asla
 
-Plataforma web diseñada para impulsar la comercialización de productos elaborados por mujeres productoras rurales, indígenas y afrodescendientes de Nicaragua.
+Plataforma web diseñada para impulsar la comercialización e intercambio de productos elaborados por mujeres productoras rurales, indígenas y afrodescendientes de Nicaragua.
 
 ## Descripción
 
@@ -12,7 +12,7 @@ La solución surge como respuesta a las barreras que enfrentan muchas productora
 
 ## Objetivo
 
-Desarrollar una plataforma web que permita a las mujeres productoras comercializar sus productos de manera sencilla, fortalecer la colaboración entre comunidades y facilitar una gestión segura de los pedidos y las entregas.
+Desarrollar una plataforma web que permita a las mujeres productoras divulgar sus productos de manera sencilla, fortalecer la colaboración entre comunidades y facilitar una gestión segura de los pedidos.
 
 ---
 
@@ -24,11 +24,71 @@ Diseño intuitivo orientado a usuarias con poca experiencia en herramientas digi
 
 ### 🤝 Comunidad
 
-Espacios que fortalecen la colaboración entre productoras mediante la organización comunitaria y la creación de redes de apoyo.
+Espacios que fortalecen la colaboración entre productoras mediante la creación de estas redes de comercio entre productoras y compradores
 
 ### 🛡️ Seguridad
 
 Diseño del sistema orientado a la confianza entre productoras y compradores, contribuyendo a una experiencia de comercialización más segura.
+
+---
+
+## Requisitos funcionales
+
+La plataforma ASLA permitirá a mujeres productoras y compradores interactuar mediante un sistema de comercialización digital de productos locales.
+
+### Gestión de usuarios
+
+- Registro e inicio de sesión de usuarios.
+- Manejo de roles dentro de la plataforma.
+
+### Gestión de productoras
+
+- Registro y administración de información de productoras.
+- Visualización de información de las productoras disponibles dentro de la plataforma.
+
+### Gestión de productos
+
+Las productoras podrán:
+
+- Crear, editar y desactivar productos.
+- Administrar información de sus productos.
+
+Los compradores podrán:
+
+- Explorar productos disponibles.
+- Buscar productos por diferentes categorias.
+- Consultar información de los productos y sus productoras.
+
+### Carrito de compras
+
+Los usuarios compradores podrán:
+
+- Agregar productos a un carrito.
+- Modificar cantidades de productos.
+- Visualizar los productos agregados agrupados por productora.
+
+### Gestión de pedidos
+
+La plataforma permitirá:
+
+- Generar pedidos a partir de los productos seleccionados en el carrito.
+- Consultar el historial de pedidos realizados.
+
+### Sistema de trueques
+
+Los usuarios podrán:
+
+- Crear propuestas de trueque.
+- Gestionar productos involucrados en un intercambio.
+- Consultar trueques realizados.
+
+### Procesamiento de pagos
+
+ASLA no implementará un sistema interno de procesamiento de pagos.
+
+La plataforma facilitará la conexión entre compradores y productoras mediante la gestión de pedidos, pero la coordinación del pago y la entrega será realizada directamente entre ambas partes mediante canales externos, como comunicación por WhatsApp.
+
+Esta decisión permite mantener el enfoque del proyecto en la comercialización, organización de pedidos y creación de redes entre productoras y compradores.
 
 ---
 
@@ -63,8 +123,8 @@ El proyecto sigue una arquitectura cliente-servidor compuesta por un frontend, u
 - React
 - JavaScript
 - Vite
-- HTML5
-- CSS3
+- HTML
+- CSS
 
 ### Backend
 
