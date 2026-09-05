@@ -1,9 +1,12 @@
 import { useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { FaLock, FaUser, FaEye, FaEyeSlash, FaLeaf, FaSeedling, FaShieldAlt } from "react-icons/fa";
+import { FaLock, FaUser, FaEye, FaEyeSlash, FaSeedling, FaShieldAlt, FaCheckCircle } from "react-icons/fa";
+import aslaLogo from "../assets/asla-logo.svg";
 
 export default function LoginPage() {
-  const { login, loginDemo, cargando } = useAuth();
+  const { login, cargando } = useAuth();
+  const location = useLocation();
 
   const [identificador, setIdentificador] = useState("");
   const [contrasena, setContrasena] = useState("");
@@ -54,21 +57,18 @@ export default function LoginPage() {
           alignItems: "center",
           gap: "10px"
         }}>
-          {/* Logo Asla en Círculo Rosa */}
-          <div style={{
-            width: "68px",
-            height: "68px",
-            borderRadius: "var(--radius-full)",
-            backgroundColor: "var(--color-primary-light)",
-            color: "var(--color-primary)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: "32px",
-            boxShadow: "0 4px 14px rgba(225, 45, 134, 0.18)"
-          }}>
-            <FaLeaf />
-          </div>
+          {/* Logo Oficial ASLA */}
+          <img
+            src={aslaLogo}
+            alt="Logo ASLA"
+            style={{
+              width: "72px",
+              height: "72px",
+              objectFit: "contain",
+              borderRadius: "14px",
+              boxShadow: "0 4px 14px rgba(0, 0, 0, 0.08)"
+            }}
+          />
 
           {/* Nombre de la Aplicación */}
           <h1 style={{
@@ -81,7 +81,7 @@ export default function LoginPage() {
             Asla
           </h1>
 
-          {/* Frase / Slogan Inspirador */}
+          {/* Frase / Slogan*/}
           <p style={{
             fontSize: "0.92rem",
             color: "var(--color-text-muted)",
@@ -93,6 +93,27 @@ export default function LoginPage() {
             "Impulsando sus manos cosechando oportunidades"
           </p>
         </div>
+
+        {/* Mensaje de Éxito (si proviene de registro exitoso) */}
+        {location.state?.mensajeExito && !error && (
+          <div style={{
+            backgroundColor: "var(--color-active-bg)",
+            color: "var(--color-active)",
+            padding: "12px 16px",
+            borderRadius: "var(--radius-md)",
+            fontSize: "0.88rem",
+            fontWeight: "600",
+            border: "1px solid #BBF7D0",
+            textAlign: "center",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "8px"
+          }}>
+            <FaCheckCircle />
+            <span>{location.state.mensajeExito}</span>
+          </div>
+        )}
 
         {/* Mensaje de Error (si existe) */}
         {error && (
@@ -127,7 +148,7 @@ export default function LoginPage() {
               <span style={{
                 position: "absolute",
                 left: "16px",
-                color: "var(--color-text-muted)",
+                color: "var(--color-secondary)",
                 fontSize: "15px",
                 display: "flex",
                 alignItems: "center"
@@ -145,8 +166,8 @@ export default function LoginPage() {
                   paddingRight: "16px",
                   height: "48px",
                   borderRadius: "var(--radius-full)",
-                  border: "1.5px solid var(--color-border)",
-                  backgroundColor: "#F8FAFC",
+                  border: "1.5px solid rgba(39, 192, 100, 0.35)",
+                  backgroundColor: "var(--color-secondary-light)",
                   fontSize: "0.95rem",
                   color: "var(--color-text-main)",
                   outline: "none",
@@ -171,7 +192,7 @@ export default function LoginPage() {
               <span style={{
                 position: "absolute",
                 left: "16px",
-                color: "var(--color-text-muted)",
+                color: "var(--color-secondary)",
                 fontSize: "15px",
                 display: "flex",
                 alignItems: "center"
@@ -189,8 +210,8 @@ export default function LoginPage() {
                   paddingRight: "46px",
                   height: "48px",
                   borderRadius: "var(--radius-full)",
-                  border: "1.5px solid var(--color-border)",
-                  backgroundColor: "#F8FAFC",
+                  border: "1.5px solid rgba(39, 192, 100, 0.35)",
+                  backgroundColor: "var(--color-secondary-light)",
                   fontSize: "0.95rem",
                   color: "var(--color-text-main)",
                   outline: "none",
@@ -206,7 +227,7 @@ export default function LoginPage() {
                   right: "14px",
                   background: "transparent",
                   border: "none",
-                  color: "var(--color-text-muted)",
+                  color: "var(--color-secondary)",
                   padding: "6px",
                   display: "flex",
                   alignItems: "center",
@@ -218,6 +239,26 @@ export default function LoginPage() {
                 {mostrarPassword ? <FaEyeSlash /> : <FaEye />}
               </button>
             </div>
+          </div>
+
+          {/* Enlace al Registro */}
+          <div style={{
+            textAlign: "center",
+            fontSize: "0.88rem",
+            color: "var(--color-text-muted)",
+            marginTop: "4px"
+          }}>
+            ¿No tienes una cuenta?{" "}
+            <Link
+              to="/registro"
+              style={{
+                color: "var(--color-primary)",
+                fontWeight: "700",
+                textDecoration: "none"
+              }}
+            >
+              Regístrate
+            </Link>
           </div>
 
           {/* Botón Principal: INGRESAR */}
@@ -244,41 +285,6 @@ export default function LoginPage() {
           </button>
         </form>
 
-        {/* Separador */}
-        <div style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "12px",
-          color: "var(--color-text-muted)",
-          fontSize: "0.82rem"
-        }}>
-          <div style={{ flex: 1, height: "1px", backgroundColor: "var(--color-border)" }} />
-          <span>o acceso directo</span>
-          <div style={{ flex: 1, height: "1px", backgroundColor: "var(--color-border)" }} />
-        </div>
-
-        {/* Acceso Demo */}
-        <button
-          type="button"
-          onClick={loginDemo}
-          style={{
-            backgroundColor: "var(--color-primary-light)",
-            color: "var(--color-primary-dark)",
-            border: "1.5px dashed var(--color-primary)",
-            height: "44px",
-            borderRadius: "var(--radius-full)",
-            fontSize: "0.88rem",
-            fontWeight: "700",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "8px",
-            cursor: "pointer"
-          }}
-        >
-          <FaSeedling /> Entrar como Productora Demo (Santos)
-        </button>
-
         {/* Pie Informativo de Seguridad */}
         <div style={{
           display: "flex",
@@ -290,7 +296,7 @@ export default function LoginPage() {
           textAlign: "center"
         }}>
           <FaShieldAlt style={{ color: "var(--color-primary)" }} />
-          <span>Espacio seguro para productoras rurales</span>
+          <span>Espacio seguro para compradores y productoras rurales</span>
         </div>
       </div>
     </div>

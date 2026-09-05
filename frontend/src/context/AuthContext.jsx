@@ -47,26 +47,27 @@ export function AuthProvider({ children }) {
           resolve({ exito: true, usuario: sesion });
         } else {
           setCargando(false);
-          reject(new Error("Cédula/Correo o contraseña incorrectos. Verifica tus datos o usa el acceso Demo."));
+          reject(new Error("Cédula/Correo o contraseña incorrectos. Verifica tus datos."));
         }
       }, 400);
     });
   };
 
-  const loginDemo = () => {
+  const iniciarSesionRegistro = (datos) => {
     const perfilActual = obtenerPerfil();
     const sesion = {
       idUsuario: perfilActual.idUsuario,
       idProductora: perfilActual.idProductora,
-      nombre: perfilActual.nombre,
-      apellido: perfilActual.apellido,
-      nombreEmprendimiento: perfilActual.nombreEmprendimiento,
-      correo: perfilActual.correo,
-      cedula: perfilActual.cedula,
+      nombre: datos?.nombre || perfilActual.nombre,
+      apellido: datos?.apellido || perfilActual.apellido,
+      nombreEmprendimiento: datos?.nombreEmprendimiento || perfilActual.nombreEmprendimiento,
+      correo: datos?.correo || perfilActual.correo,
+      cedula: datos?.cedula || perfilActual.cedula,
       fotoUrl: perfilActual.fotoUrl
     };
     setUsuario(sesion);
     localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(sesion));
+    return sesion;
   };
 
   const logout = () => {
@@ -81,7 +82,7 @@ export function AuthProvider({ children }) {
         estaAutenticado: !!usuario,
         cargando,
         login,
-        loginDemo,
+        iniciarSesionRegistro,
         logout
       }}
     >
