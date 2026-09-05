@@ -27,7 +27,7 @@ const Carrito = ({
         groups[producerName] = {
           producer: producerName,
           location: item.location || 'Nicaragua',
-          phone: item.phone || '50588991122',
+          phone: item.phone || '505......',
           items: [],
           subtotal: 0,
           totalQty: 0,
@@ -181,24 +181,27 @@ const Carrito = ({
                             </span>
 
                             <div className="cart-item-controls-row">
-ç                              <div className="cart-stepper">
-                                <button
-                                  type="button"
-                                  className="cart-stepper-btn"
-                                  onClick={() => onUpdateQuantity(item.id, -1)}
-                                  aria-label="Disminuir"
-                                >
-                                  -
-                                </button>
-                                <span className="cart-stepper-qty">{item.quantity}</span>
-                                <button
-                                  type="button"
-                                  className="cart-stepper-btn"
-                                  onClick={() => onUpdateQuantity(item.id, 1)}
-                                  aria-label="Aumentar"
-                                >
-                                  +
-                                </button>
+                              <div className="cart-qty-wrapper">
+                                <span className="cart-qty-label">Cantidad:</span>
+                                <div className="cart-stepper">
+                                  <button
+                                    type="button"
+                                    className="cart-stepper-btn"
+                                    onClick={() => onUpdateQuantity(item.id, -1)}
+                                    aria-label="Disminuir"
+                                  >
+                                    -
+                                  </button>
+                                  <span className="cart-stepper-qty">{item.quantity}</span>
+                                  <button
+                                    type="button"
+                                    className="cart-stepper-btn"
+                                    onClick={() => onUpdateQuantity(item.id, 1)}
+                                    aria-label="Aumentar"
+                                  >
+                                    +
+                                  </button>
+                                </div>
                               </div>
 
                               <span className="cart-item-subtotal-text">

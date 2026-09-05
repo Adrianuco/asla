@@ -74,57 +74,33 @@ input, textarea {
   justify-content: center;
   align-items: flex-start;
   min-height: 100vh;
-  background-color: #E2E8F0;
+  background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
   width: 100%;
 }
 
 .mobile-frame-container {
   width: 100%;
-  max-width: 460px;
+  max-width: 440px;
   min-height: 100vh;
   background-color: var(--bg-mobile);
   position: relative;
-  box-shadow: 0 0 35px rgba(0, 0, 0, 0.12);
   display: flex;
   flex-direction: column;
   overflow: hidden;
   margin: 0 auto;
 }
 
-@media (min-width: 1025px) {
-  .app-layout {
-    padding: 24px 0;
-    background: linear-gradient(135deg, #E2E8F0 0%, #CBD5E1 100%);
-  }
-  .mobile-frame-container {
-    max-width: 600px;
-    border-radius: 32px;
-    min-height: 92vh;
-    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.16);
-  }
-}
-
-@media (min-width: 641px) and (max-width: 1024px) {
+@media (min-width: 480px) {
   .app-layout {
     padding: 20px 0;
-    background: linear-gradient(135deg, #E2E8F0 0%, #CBD5E1 100%);
+    background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
   }
   .mobile-frame-container {
-    max-width: 560px;
-    border-radius: 28px;
-    min-height: 92vh;
-    box-shadow: 0 12px 38px rgba(0, 0, 0, 0.14);
-  }
-}
-
-@media (min-width: 480px) and (max-width: 640px) {
-  .app-layout {
-    padding: 12px 0;
-  }
-  .mobile-frame-container {
-    max-width: 480px;
-    border-radius: 24px;
+    max-width: 440px;
+    border-radius: 38px;
     min-height: 94vh;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.35), 0 0 0 8px rgba(255, 255, 255, 0.15);
+    margin: 10px auto 20px auto;
   }
 }
 
@@ -138,6 +114,7 @@ input, textarea {
     min-height: 100vh;
     box-shadow: none;
     max-width: 100%;
+    margin: 0;
   }
 }
 
@@ -181,13 +158,18 @@ input, textarea {
   align-items: baseline;
   cursor: pointer;
   user-select: none;
+  transition: transform 0.2s ease;
+}
+
+.brand-logo:active {
+  transform: scale(0.96);
 }
 
 .logo-text {
   font-family: var(--font-logo);
-  font-size: 35px;
-  font-weight: 800;
-  letter-spacing: -0.5px;
+  font-size: clamp(36px, 9vw, 42px);
+  font-weight: 900;
+  letter-spacing: -0.8px;
   color: #FFFFFF;
   line-height: 1;
   text-shadow: 
@@ -195,7 +177,7 @@ input, textarea {
      1.5px -1.5px 0 #15803D,
     -1.5px  1.5px 0 #15803D,
      1.5px  1.5px 0 #15803D,
-     0 3px 6px rgba(0, 0, 0, 0.25);
+     0 4px 10px rgba(0, 0, 0, 0.3);
 }
 
 .cart-button {
@@ -668,7 +650,7 @@ input, textarea {
   transform: translateY(-2px);
 }
 
-/* Borde del Avatar */
+
 .producer-avatar-ring {
   width: 84px;
   height: 84px;
@@ -722,41 +704,59 @@ input, textarea {
 }
 
 /* ==========================================================================
-   MENÚ INFERIOR FLOTANTE 
+   MENÚ INFERIOR FLOTANTE (ADAPTATIVO Y RESPONSIVO)
    ========================================================================== */
 
 .bottom-nav-container {
   position: fixed;
-  bottom: max(16px, env(safe-area-inset-bottom, 16px));
-  left: 0;
-  right: 0;
+  bottom: max(14px, env(safe-area-inset-bottom, 14px));
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 460px;
+  padding: 0 14px;
   display: flex;
   justify-content: center;
+  align-items: center;
   z-index: 100;
-  pointer-events: none; /* no bloquea clics a los lados */
+  pointer-events: none; 
+  box-sizing: border-box;
 }
 
 .bottom-nav-pill {
   pointer-events: auto;
-  width: min(390px, 92vw);
-  background-color: var(--primary-green);
+  width: 100%;
+  background: linear-gradient(135deg, #27C064 0%, #1FA855 100%);
   border-radius: 9999px;
-  padding: 6px 12px;
+  padding: 6px 8px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  box-shadow: 0 8px 24px rgba(39, 192, 100, 0.45);
+  gap: 4px;
+  box-shadow: 0 8px 26px rgba(39, 192, 100, 0.45), 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-sizing: border-box;
 }
 
 .nav-pill-item {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 8px 14px;
+  gap: 6px;
+  padding: 8px 12px;
   border-radius: 9999px;
   color: #FFFFFF;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  flex: 0 1 auto;
+  min-width: 42px;
+  min-height: 42px;
   transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  user-select: none;
+  box-sizing: border-box;
 }
 
 .nav-pill-item:active {
@@ -765,9 +765,10 @@ input, textarea {
 
 .nav-pill-item.active {
   background-color: #FFFFFF;
-  color: #000000;
-  padding: 8px 18px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  color: #0F172A;
+  padding: 8px 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  flex: 0 0 auto;
 }
 
 .nav-icon-box {
@@ -776,24 +777,31 @@ input, textarea {
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .nav-svg-icon {
   width: 22px;
   height: 22px;
+  transition: transform 0.2s ease;
+}
+
+.nav-pill-item:hover .nav-svg-icon {
+  transform: scale(1.08);
 }
 
 .nav-item-label {
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 700;
-  color: #000000;
+  color: #0F172A;
   letter-spacing: -0.2px;
   white-space: nowrap;
 }
 
 .bottom-nav-spacer {
-  height: 80px;
+  height: 85px;
   width: 100%;
+  flex-shrink: 0;
 }
 
 /* ==========================================================================
@@ -1196,7 +1204,7 @@ input, textarea {
 
 /* ==========================================================================
    MODALES Y OVERLAYS
-   =====================================================================/* Backdrop Modal */
+   ===================================================================== */
 .modal-backdrop {
   position: fixed;
   top: 0;
@@ -3627,6 +3635,19 @@ input, textarea {
 }
 
 /* Fila de Acciones y Stepper */
+.cart-qty-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.cart-qty-label {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #64748B;
+  user-select: none;
+}
+
 .cart-stepper {
   display: flex;
   align-items: center;
@@ -3754,7 +3775,7 @@ input, textarea {
 }
 
 /* ==========================================================================
-   SISTEMA DE DISEÑO RESPONSIVO INTEGRAL 
+   SISTEMA DE DISEÑO RESPONSIVO  
    ========================================================================== */
 
 /* 1. RESPONSIVOS GLOBALES */
@@ -3794,10 +3815,8 @@ html, body {
   background: rgba(100, 116, 139, 0.6);
 }
 
-/* 2. DISPOSITIVOS MÓVILES  PEQUEÑOS (<= 360px) 
-   (iPhone SE, Galaxy Fold cerrado, pantallas compactas) */
+/* 2. DISPOSITIVOS MÓVILES  PEQUEÑOS (<= 360px)  */
 @media screen and (max-width: 360px) {
-  /* Cabecera Principal */
   .asla-header-green {
     padding: 12px 10px 10px 10px;
   }
@@ -3825,7 +3844,7 @@ html, body {
     font-size: 12px;
   }
 
-  /* Banner Promocional */
+  /* Banner */
   .banner-section {
     padding: 10px 10px 4px 10px;
   }
@@ -4101,23 +4120,35 @@ html, body {
   }
 
   /* Menú Inferior de Navegación */
+  .bottom-nav-container {
+    max-width: 100%;
+    padding: 0 8px;
+    bottom: max(10px, env(safe-area-inset-bottom, 10px));
+  }
   .bottom-nav-pill {
-    width: 95%;
+    width: 100%;
     padding: 4px 6px;
+    gap: 2px;
   }
   .nav-pill-item {
     padding: 6px 8px;
-    gap: 4px;
+    min-width: 36px;
+    min-height: 36px;
+    gap: 3px;
   }
   .nav-pill-item.active {
-    padding: 6px 12px;
+    padding: 6px 10px;
+  }
+  .nav-icon-box {
+    width: 20px;
+    height: 20px;
   }
   .nav-svg-icon {
     width: 18px;
     height: 18px;
   }
   .nav-item-label {
-    font-size: 12px;
+    font-size: 11.5px;
   }
 
   /* Modales */
@@ -4137,10 +4168,10 @@ html, body {
   }
 }
 
-/* 3. DISPOSITIVOS MÓVILES ESTÁNDAR Y MEDIANOS (361px a 480px) */
-@media screen and (min-width: 361px) and (max-width: 480px) {
+/* 3. DISPOSITIVOS MÓVILES ESTÁNDAR (361px a 599px) */
+@media screen and (min-width: 361px) and (max-width: 599px) {
   .product-card {
-    width: 148px;
+    width: 146px;
   }
   .product-image-container {
     height: 135px;
@@ -4149,457 +4180,27 @@ html, body {
     width: 56px;
     height: 56px;
   }
-}
-
-/* 4. MÓVILES  (481px a 640px) */
-@media screen and (min-width: 481px) and (max-width: 640px) {
-  .product-card {
-    width: 160px;
-  }
-  .product-image-container {
-    height: 148px;
-  }
-  .banner-card {
-    min-height: 140px;
-  }
-  .banner-title {
-    font-size: 22px;
-  }
-  .productoras-cards-feed {
-    padding: 16px;
-    gap: 16px;
-  }
-  .detail-hero-image-wrapper {
-    height: 280px;
+  .bottom-nav-container {
+    max-width: 440px;
+    padding: 0 14px;
+    bottom: max(14px, env(safe-area-inset-bottom, 14px));
   }
   .bottom-nav-pill {
-    max-width: 400px;
+    width: 100%;
+    max-width: 410px;
+    padding: 6px 8px;
+    gap: 4px;
   }
 }
 
-/* 5. TABLETS (641px a 1024px) */
-@media screen and (min-width: 641px) and (max-width: 1024px) {
-  /* Cabecera y Barra de Categorías */
-  .asla-header-green {
-    padding: 18px 22px 16px 22px;
-  }
-  .logo-text {
-    font-size: 38px;
-  }
-  .search-bar {
-    padding: 10px 18px;
-  }
-  .categories-white-bar {
-    padding: 14px 22px 12px 22px;
-  }
-  .category-pill-gray {
-    padding: 8px 18px;
-    font-size: 14px;
-  }
-
-  /* Banner */
-  .banner-section {
-    padding: 16px 20px 8px 20px;
-  }
-  .banner-card {
-    min-height: 155px;
-    padding: 20px 52px;
-    border-radius: 24px;
-  }
-  .banner-title {
-    font-size: 24px;
-  }
-  .banner-subtitle {
-    font-size: 14.5px;
-    max-width: 320px;
-  }
-
-  /* Secciones y Productos */
-  .section-header {
-    padding: 0 20px 12px 20px;
-  }
-  .section-title {
-    font-size: 22px;
-  }
-  .carrusel-horizontal-scroll,
-  .personas-horizontal-scroll {
-    padding: 6px 20px 16px 20px;
-  }
-  .productos-track {
-    gap: 18px;
-  }
-  .product-card {
-    width: 168px;
-    border-radius: 20px;
-  }
-  .product-image-container {
-    height: 155px;
-  }
-  .product-info {
-    padding: 12px;
-  }
-  .product-title {
-    font-size: 15px;
-  }
-
-  /* Productoras */
-  .productoras-hero-banner {
-    padding: 28px 24px 24px 24px;
-    border-bottom-left-radius: 28px;
-    border-bottom-right-radius: 28px;
-  }
-  .hero-title {
-    font-size: 30px;
-  }
-  .hero-subtitle {
-    font-size: 14px;
-  }
-  .hero-image-box {
-    width: 120px;
-    height: 120px;
-  }
-  .productoras-cards-feed {
-    padding: 20px 18px;
-    gap: 18px;
-  }
-  .productora-feed-card {
-    border-radius: 24px;
-    padding: 18px;
-  }
-  .feed-avatar-ring {
-    width: 74px;
-    height: 74px;
-  }
-  .feed-producer-name {
-    font-size: 18px;
-  }
-  .feed-products-grid-box {
-    padding: 10px;
-    gap: 10px;
-    border-radius: 18px;
-  }
-
-  /* Detalle de Producto */
-  .detail-hero-image-wrapper {
-    height: 340px;
-  }
-  .detail-content-body {
-    padding: 22px 20px 40px 20px;
-    gap: 16px;
-  }
-  .detail-card {
-    border-radius: 24px;
-    padding: 18px 20px;
-  }
-  .detail-product-title {
-    font-size: 24px;
-  }
-  .detail-price-amount {
-    font-size: 24px;
-  }
-  .detail-actions-container {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 14px;
-  }
-  .detail-action-btn {
-    padding: 15px 18px;
-    font-size: 15.5px;
-  }
-
-  /* Perfil de Usuario */
-  .profile-top-bar {
-    padding: 18px 22px;
-  }
-  .profile-content-body {
-    padding: 20px 18px 40px 18px;
-    gap: 18px;
-  }
-  .user-header-card {
-    padding: 26px 20px 20px 20px;
-    border-radius: 24px;
-  }
-  .profile-avatar-wrapper {
-    width: 105px;
-    height: 105px;
-  }
-  .profile-user-name {
-    font-size: 23px;
-  }
-  .role-selector-card {
-    padding: 18px 20px;
-    border-radius: 24px;
-  }
-  .role-toggle-btn {
-    padding: 13px 20px;
-    font-size: 15.5px;
-  }
-  .menu-list-card {
-    border-radius: 24px;
-    padding: 6px 0;
-  }
-  .menu-list-row {
-    padding: 17px 22px;
-  }
-  .profile-bottom-logout-btn {
-    padding: 15px 20px;
-    font-size: 15.5px;
-    border-radius: 18px;
-  }
-
-  /* Carrito */
-  .cart-content-body {
-    padding: 20px 18px 40px 18px;
-    gap: 18px;
-  }
-  .cart-producer-group-card {
-    border-radius: 24px;
-  }
-  .cart-producer-header {
-    padding: 15px 18px;
-  }
-  .cart-item-card-row {
-    padding: 14px 18px;
-    gap: 14px;
-  }
-  .cart-item-thumb-box {
-    width: 64px;
-    height: 64px;
-  }
-  .cart-item-title {
-    font-size: 16px;
-  }
-  .cart-producer-group-footer {
-    padding: 15px 18px;
-  }
-  .cart-producer-whatsapp-btn {
-    padding: 14px 18px;
-    font-size: 15px;
-  }
-  .cart-summary-card {
-    padding: 20px 18px;
-    border-radius: 24px;
-  }
-  .cart-checkout-all-whatsapp-btn {
-    padding: 16px 20px;
-    font-size: 16px;
-  }
-
-  /* Menú Inferior */
-  .bottom-nav-pill {
-    max-width: 430px;
-    padding: 8px 16px;
-  }
-  .nav-pill-item {
-    padding: 9px 16px;
-  }
-  .nav-pill-item.active {
-    padding: 9px 22px;
-  }
-}
-
-/* 6. PANTALLAS DE ESCRITORIO Y PANTALLAS (> 1024px) */
-@media screen and (min-width: 1025px) {
-  /* Cabecera */
-  .asla-header-green {
-    padding: 20px 24px 18px 24px;
-  }
-  .logo-text {
-    font-size: 40px;
-  }
-  .search-bar {
-    padding: 11px 20px;
-  }
-  .categories-white-bar {
-    padding: 15px 24px 13px 24px;
-  }
-  .category-pill-gray {
-    padding: 9px 20px;
-    font-size: 14.5px;
-  }
-
-  /* Banner */
-  .banner-section {
-    padding: 18px 24px 10px 24px;
-  }
-  .banner-card {
-    min-height: 165px;
-    padding: 22px 60px;
-    border-radius: 26px;
-  }
-  .banner-title {
-    font-size: 26px;
-  }
-  .banner-subtitle {
-    font-size: 15px;
-    max-width: 360px;
-  }
-
-  /* Secciones y Productos */
-  .section-header {
-    padding: 0 24px 14px 24px;
-  }
-  .section-title {
-    font-size: 23px;
-  }
-  .carrusel-horizontal-scroll,
-  .personas-horizontal-scroll {
-    padding: 6px 24px 18px 24px;
-  }
-  .productos-track {
-    gap: 20px;
-  }
-  .product-card {
-    width: 175px;
-    border-radius: 22px;
-  }
-  .product-image-container {
-    height: 165px;
-  }
-  .product-info {
-    padding: 14px;
-  }
-
-  /* Productoras */
-  .productoras-hero-banner {
-    padding: 30px 26px 26px 26px;
-    border-bottom-left-radius: 30px;
-    border-bottom-right-radius: 30px;
-  }
-  .hero-title {
-    font-size: 32px;
-  }
-  .hero-image-box {
-    width: 130px;
-    height: 130px;
-  }
-  .productoras-cards-feed {
-    padding: 22px 20px;
-    gap: 20px;
-  }
-  .productora-feed-card {
-    border-radius: 26px;
-    padding: 20px;
-  }
-
-  /* Detalle de Producto */
-  .detail-hero-image-wrapper {
-    height: 380px;
-  }
-  .detail-content-body {
-    padding: 24px 22px 45px 22px;
-    gap: 18px;
-  }
-  .detail-card {
-    border-radius: 26px;
-    padding: 20px 24px;
-  }
-  .detail-actions-container {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-  }
-  .detail-action-btn {
-    padding: 16px 22px;
-    font-size: 16px;
-  }
-
-  /* Perfil de Usuario */
-  .profile-top-bar {
-    padding: 20px 24px;
-  }
-  .profile-content-body {
-    padding: 22px 20px 45px 20px;
-    gap: 20px;
-  }
-  .user-header-card {
-    padding: 30px 24px 24px 24px;
-    border-radius: 26px;
-  }
-  .profile-avatar-wrapper {
-    width: 115px;
-    height: 115px;
-  }
-  .profile-user-name {
-    font-size: 25px;
-  }
-  .role-selector-card {
-    padding: 20px 24px;
-    border-radius: 26px;
-  }
-  .role-toggle-btn {
-    padding: 14px 24px;
-    font-size: 16px;
-  }
-  .menu-list-card {
-    border-radius: 26px;
-  }
-  .menu-list-row {
-    padding: 18px 24px;
-  }
-  .profile-bottom-logout-btn {
-    padding: 16px 24px;
-    font-size: 16px;
-    border-radius: 20px;
-  }
-
-  /* Carrito */
-  .cart-content-body {
-    padding: 22px 20px 45px 20px;
-    gap: 20px;
-  }
-  .cart-producer-group-card {
-    border-radius: 26px;
-  }
-  .cart-producer-header {
-    padding: 16px 20px;
-  }
-  .cart-item-card-row {
-    padding: 15px 20px;
-    gap: 16px;
-  }
-  .cart-item-thumb-box {
-    width: 70px;
-    height: 70px;
-  }
-  .cart-item-title {
-    font-size: 17px;
-  }
-  .cart-producer-group-footer {
-    padding: 16px 20px;
-  }
-  .cart-producer-whatsapp-btn {
-    padding: 15px 20px;
-    font-size: 15.5px;
-  }
-  .cart-summary-card {
-    padding: 22px 20px;
-    border-radius: 26px;
-  }
-  .cart-checkout-all-whatsapp-btn {
-    padding: 17px 22px;
-    font-size: 16.5px;
-  }
-
-  /* Menú Inferior */
-  .bottom-nav-pill {
-    max-width: 450px;
-    padding: 9px 18px;
-  }
-  .nav-pill-item {
-    padding: 10px 18px;
-  }
-  .nav-pill-item.active {
-    padding: 10px 24px;
-  }
-}
-
-/* 7. ADAPTACIÓN DE MODALES SEGÚN EL TAMAÑO DE PANTALLA */
-@media screen and (max-width: 640px) {
+/* 4. MODALES EN MÓVILES*/
+@media screen and (max-width: 599px) {
   .modal-backdrop {
-    align-items: flex-end;
-    padding: 0;
+    align-items: flex-end !important;
+    justify-content: center !important;
+    padding: 0 !important;
   }
+
   .modal-sheet,
   .modal-trueque-sheet,
   .profile-edit-modal-sheet {
@@ -4608,33 +4209,14 @@ html, body {
     border-bottom-left-radius: 0 !important;
     border-bottom-right-radius: 0 !important;
     max-width: 100% !important;
-    max-height: 88vh;
-    animation: slideUp 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.15);
+    width: 100% !important;
+    max-height: 88vh !important;
+    animation: slideUp 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.15) !important;
+    margin: 0 auto !important;
   }
 }
 
-@media screen and (min-width: 641px) {
-  .modal-backdrop {
-    align-items: center;
-    justify-content: center;
-    padding: 24px;
-    background-color: rgba(15, 23, 42, 0.68);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-  }
-  .modal-sheet,
-  .modal-trueque-sheet,
-  .profile-edit-modal-sheet {
-    border-radius: 28px !important;
-    max-width: 500px !important;
-    max-height: 85vh;
-    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
-    animation: popIn 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    margin: auto;
-  }
-}
-
-/* 8. ADAPTACIÓN PARA MÓVILES EN MODO HORIZONTAL */
+/* 5. ADAPTACIÓN PARA MÓVILES EN MODO HORIZONTAL */
 @media screen and (max-height: 500px) and (orientation: landscape) {
   .banner-card {
     min-height: 90px;
@@ -4646,6 +4228,388 @@ html, body {
   .modal-sheet,
   .modal-trueque-sheet,
   .profile-edit-modal-sheet {
-    max-height: 92vh;
+    max-height: 92vh !important;
   }
+}
+
+
+
+/* ==========================================================================
+   PANTALLA DE REGISTRO DE USUARIO
+   ========================================================================== */
+
+.register-standalone-page {
+  width: 100%;
+  min-height: 100vh;
+  background: linear-gradient(180deg, #F0FDF4 0%, #F8FAFC 50%, #ECFDF5 100%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 24px 12px;
+  box-sizing: border-box;
+}
+
+.register-body-container {
+  width: 100%;
+  max-width: 440px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: auto;
+}
+
+.register-card-white {
+  background-color: #FFFFFF;
+  border-radius: 28px;
+  padding: 30px 22px 28px 22px;
+  width: 100%;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06), 0 2px 8px rgba(39, 192, 100, 0.06);
+  border: 1.5px solid #E2E8F0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  position: relative;
+  box-sizing: border-box;
+}
+
+.register-clean-back-btn {
+  position: absolute;
+  top: 18px;
+  left: 18px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: #E8F8EE;
+  border: 1.5px solid #A7F3D0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+.register-clean-back-btn:hover {
+  background-color: #DCFCE7;
+  border-color: #27C064;
+  transform: scale(1.06);
+}
+
+.register-clean-back-btn:active {
+  transform: scale(0.92);
+}
+
+/* 1. Logo Oficial de Asla */
+.asla-official-logo-box {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 2px;
+  margin-bottom: 2px;
+}
+
+.asla-official-emblem-svg {
+  width: 98px;
+  height: 98px;
+  filter: drop-shadow(0 4px 14px rgba(140, 198, 63, 0.22));
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.asla-official-emblem-svg:hover {
+  transform: scale(1.04);
+  filter: drop-shadow(0 6px 18px rgba(140, 198, 63, 0.32));
+}
+
+/* 2. Marca Asla en color rosado/magenta como en la imagen */
+.register-brand-tag {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 4px;
+  margin-bottom: 2px;
+}
+
+.brand-logo-text {
+  font-family: var(--font-logo);
+  font-size: clamp(34px, 8vw, 42px);
+  font-weight: 900;
+  letter-spacing: -0.5px;
+  color: #E8227E;
+  display: inline-block;
+  line-height: 1.1;
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.brand-logo-text:hover {
+  transform: scale(1.05);
+}
+
+/* 3. Título Principal debajo de Asla */
+.register-title-section {
+  text-align: center;
+  margin-bottom: 6px;
+}
+
+.register-main-title {
+  font-size: clamp(22px, 5.5vw, 26px);
+  font-weight: 900;
+  color: #0B1B2B;
+  font-family: var(--font-logo), var(--font-family);
+  letter-spacing: -0.5px;
+  margin: 0;
+}
+
+.register-subtitle {
+  font-size: 13.5px;
+  color: #64748B;
+  margin-top: 4px;
+  font-weight: 500;
+}
+
+/* Alerta de Error */
+.register-error-alert {
+  background-color: #FEF2F2;
+  border: 1px solid #FECACA;
+  color: #DC2626;
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Formulario */
+.register-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.register-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.register-field-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #334155;
+}
+
+.label-with-badge {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.match-badge {
+  font-size: 11.5px;
+  font-weight: 800;
+  color: #16A34A;
+  background-color: #DCFCE7;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  border: 1px solid #86EFAC;
+}
+
+.field-hint-text {
+  font-size: 11px;
+  color: #94A3B8;
+  font-weight: 500;
+  margin-top: 2px;
+}
+
+/* Inputs */
+.pastel-input-container {
+  background-color: #E8F8EE;
+  border: 1.5px solid #A7F3D0;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  padding: 3px 12px;
+  transition: all 0.2s ease;
+}
+
+.pastel-input-container:focus-within {
+  border-color: #27C064;
+  background-color: #F0FDF4;
+  box-shadow: 0 0 0 3.5px rgba(39, 192, 100, 0.22);
+}
+
+.pastel-input-container.input-success {
+  border-color: #22C55E;
+  background-color: #F0FDF4;
+}
+
+.input-prefix-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 8px;
+  flex-shrink: 0;
+}
+
+.pastel-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 10px 4px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #0F172A;
+  outline: none;
+  width: 100%;
+}
+
+.pastel-input::placeholder {
+  color: #2E7D47;
+  opacity: 0.55;
+  font-weight: 500;
+}
+
+.password-toggle-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.15s ease;
+}
+
+.password-toggle-btn:hover {
+  background-color: rgba(39, 192, 100, 0.15);
+}
+
+/* Selector de Género  */
+.gender-chips-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-top: 2px;
+}
+
+.gender-chips-grid.gender-two-columns {
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.gender-chip-btn {
+  background-color: #E8F8EE;
+  border: 1.5px solid #A7F3D0;
+  border-radius: 14px;
+  padding: 10px 8px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #166534;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.gender-chip-btn:hover {
+  border-color: #27C064;
+  background-color: #F0FDF4;
+}
+
+.gender-chip-btn.active {
+  background-color: #27C064;
+  border-color: #27C064;
+  color: #FFFFFF;
+  box-shadow: 0 3px 10px rgba(39, 192, 100, 0.3);
+}
+
+/* Botón "Registrarse" */
+.register-submit-btn-strong-green {
+  background-color: #27C064; 
+  color: #FFFFFF;
+  border-radius: 9999px;
+  padding: 15px 20px;
+  font-size: 16px;
+  font-weight: 800;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 20px rgba(39, 192, 100, 0.4);
+  transition: all 0.2s ease;
+  width: 100%;
+  margin-top: 8px;
+  letter-spacing: 0.2px;
+}
+
+.register-submit-btn-strong-green:hover:not(:disabled) {
+  background-color: #1E9D4E;
+  box-shadow: 0 8px 24px rgba(30, 157, 78, 0.45);
+  transform: translateY(-1px);
+}
+
+.register-submit-btn-strong-green:active:not(:disabled) {
+  transform: scale(0.98);
+  box-shadow: 0 3px 10px rgba(39, 192, 100, 0.3);
+}
+
+.register-submit-btn-strong-green:disabled {
+  opacity: 0.75;
+  cursor: not-allowed;
+}
+
+.btn-loading-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.spinner-dots {
+  width: 16px;
+  height: 16px;
+  border: 2.5px solid #FFFFFF;
+  border-bottom-color: transparent;
+  border-radius: 50%;
+  display: inline-block;
+  box-sizing: border-box;
+  animation: rotation 0.8s linear infinite;
+}
+
+@keyframes rotation {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Footer */
+.register-footer-links {
+  text-align: center;
+  margin-top: 4px;
+}
+
+.login-prompt-text {
+  font-size: 13.5px;
+  color: #64748B;
+  font-weight: 500;
+}
+
+.link-login-green {
+  color: #27C064;
+  font-weight: 800;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 13.5px;
+  text-decoration: underline;
+  margin-left: 4px;
+  transition: color 0.15s ease;
+}
+
+.link-login-green:hover {
+  color: #1E9D4E;
 }

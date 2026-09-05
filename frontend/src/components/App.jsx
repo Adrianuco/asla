@@ -8,6 +8,7 @@ import PerfilProductora from './PerfilProductora';
 import PerfilUsuario from './PerfilUsuario';
 import ModalTrueque from './ModalTrueque';
 import Carrito from './Carrito';
+import RegistroUsuario from './RegistroUsuario';
 import Footer from './Footer';
 import Menu from './Menu';
 import { IconoUbicacion, IconoFavoritos, IconoRegresar } from '../iconos';
@@ -15,6 +16,9 @@ import { IconoUbicacion, IconoFavoritos, IconoRegresar } from '../iconos';
 const App = () => {
   // Estado de navegación inferior: 'inicio' | 'productoras' | 'favoritos' | 'perfil'
   const [activeTab, setActiveTab] = useState('inicio');
+
+  // Estado de autenticación / registro: null | 'register' | 'login'
+  const [authScreen, setAuthScreen] = useState(null);
 
   // Estado de búsqueda y filtros en Inicio
   const [searchQuery, setSearchQuery] = useState('');
@@ -134,6 +138,26 @@ const App = () => {
     showToast(`🌾 ¡Abriendo WhatsApp con ${truequeTargetProduct.producer}!`);
     setTruequeTargetProduct(null);
   };
+
+  // Si estamos en la pantalla de registro, renderizar como pantalla aparte independiente (sin headers de la app ni menú)
+  if (authScreen === 'register') {
+    return (
+      <>
+        <RegistroUsuario
+          onBack={() => setAuthScreen(null)}
+          onRegisterSuccess={(newUser) => {
+            showToast(`¡Bienvenida a Asla, ${newUser.name}! 🌱`);
+            setAuthScreen(null);
+            setActiveTab('inicio');
+          }}
+          onNavigateLogin={() => {
+            showToast('Funcionalidad de Inicio de Sesión');
+          }}
+        />
+        {toast && <div className="toast-notification">{toast}</div>}
+      </>
+    );
+  }
 
   return (
     <div className="app-layout">
@@ -446,7 +470,10 @@ const App = () => {
               )}
 
               {activeTab === 'perfil' && (
-                <PerfilUsuario onModalToggle={(isOpen) => setIsProfileModalOpen(isOpen)} />
+                <PerfilUsuario
+                  onModalToggle={(isOpen) => setIsProfileModalOpen(isOpen)}
+                  onLogout={() => setAuthScreen('register')}
+                />
               )}
             </>
           )}
@@ -478,8 +505,8 @@ const App = () => {
           </div>
         )}
 
-        {/* Menú de Navegación Inferior Flotante (Se oculta si hay pantallas completas o modales abiertos) */}
-        {!selectedProduct && !selectedProducer && !isCartOpen && !isProfileModalOpen && (
+        {/* Menú de Navegación Inferior Flotante (Se oculta si hay pantallas completas, modales abiertos o pantalla de registro) */}
+        {!selectedProduct && !selectedProducer && !isCartOpen && !isProfileModalOpen && !authScreen && (
           <Menu
             activeTab={activeTab}
             onTabChange={(tab) => {

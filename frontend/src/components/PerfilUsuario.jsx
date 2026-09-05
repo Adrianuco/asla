@@ -11,11 +11,10 @@ import {
   IconoCerrarSesion,
 } from '../iconos';
 
-const PerfilUsuario = ({ onModalToggle = () => {} }) => {
+const PerfilUsuario = ({ onModalToggle = () => {}, onLogout = () => {} }) => {
   // Estado del rol: 'compradora' | 'productora'
   const [activeRole, setActiveRole] = useState('compradora');
 
-  // Datos del perfil de la usuaria
   const [userData, setUserData] = useState({
     name: 'Ana María Lopez',
     phone: '+505 8899-1122',
@@ -23,10 +22,8 @@ const PerfilUsuario = ({ onModalToggle = () => {} }) => {
     location: 'Jinotepe, Nicaragua',
   });
 
-  // Modal activo: 'name_phone' | 'email' | 'password' | null
   const [activeModal, setActiveModal] = useState(null);
 
-  // Estados temporales para los formularios
   const [tempName, setTempName] = useState(userData.name);
   const [tempPhone, setTempPhone] = useState(userData.phone);
 
@@ -37,7 +34,6 @@ const PerfilUsuario = ({ onModalToggle = () => {} }) => {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
-  // Toast local de notificación
   const [toast, setToast] = useState(null);
 
   const showToast = (message) => {
@@ -53,7 +49,6 @@ const PerfilUsuario = ({ onModalToggle = () => {} }) => {
     onModalToggle(false);
   };
 
-  // Abrir modal preparando los valores y ocultar menú inferior
   const handleOpenModal = (modalType) => {
     if (modalType === 'name_phone') {
       setTempName(userData.name);
@@ -120,7 +115,7 @@ const PerfilUsuario = ({ onModalToggle = () => {} }) => {
 
   return (
     <div className="profile-screen-container animate-fade-in">
-      {/* Barra Superior Verde */}
+  
       <div className="profile-top-bar">
         <h1 className="profile-top-title">Mi Perfil</h1>
       </div>
@@ -191,9 +186,9 @@ const PerfilUsuario = ({ onModalToggle = () => {} }) => {
           </p>
         </div>
 
-        {/* Contenido Condicional Según el Rol */}
+       
         {activeRole === 'compradora' && (
-          /* Apartado Compradora: Edición de Datos, Teléfono, Correo y Contraseña */
+          
           <div className="profile-card menu-list-card animate-fade-in">
             {}
             <div
@@ -252,7 +247,10 @@ const PerfilUsuario = ({ onModalToggle = () => {} }) => {
         <button
           type="button"
           className="profile-bottom-logout-btn"
-          onClick={() => showToast('Sesión cerrada correctamente')}
+          onClick={() => {
+            showToast('Sesión cerrada correctamente');
+            if (onLogout) onLogout();
+          }}
           aria-label="Cerrar sesión"
         >
           <IconoCerrarSesion size={18} color="#FFFFFF" strokeWidth={2.4} />
