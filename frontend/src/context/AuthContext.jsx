@@ -1,5 +1,6 @@
 import { createContext, useContext, useState } from "react";
 import { obtenerPerfil } from "../data/mockData";
+import { productoraService } from "../services/productoraService";
 
 const AuthContext = createContext();
 
@@ -20,41 +21,50 @@ export function AuthProvider({ children }) {
 
   const [cargando, setCargando] = useState(false);
 
-  const login = (identificador, contrasena) => {
+  const login = async (identificador, contrasena) => {
     setCargando(true);
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        const perfilActual = obtenerPerfil();
-        const identLimpio = identificador.trim().toLowerCase();
+    let perfilActual = obtenerPerfil();
+    try {
+      const perfilRemoto = await productoraService.getPerfilCompleto(1);
+      if (perfilRemoto) perfilActual = perfilRemoto;
+    } catch {
+      // Fallback local
+    }
 
-        const coincideCorreo = perfilActual.correo.toLowerCase() === identLimpio;
-        const coincideCedula = perfilActual.cedula.toLowerCase() === identLimpio;
+    const identLimpio = identificador.trim().toLowerCase();
+    const coincideCorreo = perfilActual.correo?.toLowerCase() === identLimpio;
+    const coincideCedula = perfilActual.cedula?.toLowerCase() === identLimpio;
 
-        if ((coincideCorreo || coincideCedula || identLimpio === "productora" || identLimpio.includes("santos")) && contrasena) {
-          const sesion = {
-            idUsuario: perfilActual.idUsuario,
-            idProductora: perfilActual.idProductora,
-            nombre: perfilActual.nombre,
-            apellido: perfilActual.apellido,
-            nombreEmprendimiento: perfilActual.nombreEmprendimiento,
-            correo: perfilActual.correo,
-            cedula: perfilActual.cedula,
-            fotoUrl: perfilActual.fotoUrl
-          };
-          setUsuario(sesion);
-          localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(sesion));
-          setCargando(false);
-          resolve({ exito: true, usuario: sesion });
-        } else {
-          setCargando(false);
-          reject(new Error("Cédula/Correo o contraseña incorrectos. Verifica tus datos o usa el acceso Demo."));
-        }
-      }, 400);
-    });
+    if ((coincideCorreo || coincideCedula || identLimpio === "productora" || identLimpio.includes("santos")) && contrasena) {
+      const sesion = {
+        idUsuario: perfilActual.idUsuario,
+        idProductora: perfilActual.idProductora,
+        nombre: perfilActual.nombre,
+        apellido: perfilActual.apellido,
+        nombreEmprendimiento: perfilActual.nombreEmprendimiento,
+        correo: perfilActual.correo,
+        cedula: perfilActual.cedula,
+        fotoUrl: perfilActual.fotoUrl
+      };
+      setUsuario(sesion);
+      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(sesion));
+      setCargando(false);
+      return { exito: true, usuario: sesion };
+    } else {
+      setCargando(false);
+      throw new Error("Cédula/Correo o contraseña incorrectos. Verifica tus datos o usa el acceso Demo.");
+    }
   };
 
-  const loginDemo = () => {
-    const perfilActual = obtenerPerfil();
+  const loginDemo = async () => {
+    let perfilActual = obtenerPerfil();
+    try {
+      const perfilRemoto = await productoraService.getPerfilCompleto(1);
+      if (perfilRemoto) perfilActual = perfilRemoto;
+    } catch {
+      // Fallback local
+    }
+
     const sesion = {
       idUsuario: perfilActual.idUsuario,
       idProductora: perfilActual.idProductora,

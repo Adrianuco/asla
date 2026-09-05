@@ -185,8 +185,19 @@ app/
 ├── database/
 │
 ├── docs/
+│   └── entregables/
+│       ├── ENTREGABLES_DESARROLLO.md  # Evidencias para evaluación del Hackathon
+│       └── screenshots/               # Capturas de pantalla del sistema
 │
 └── README.md
 ```
 
 ---
+
+## 📄 Entregables de Desarrollo
+
+Para consultar el detalle de evidencias técnicas requeridas para la clasificación del Hackathon (Interfaz y Desarrollo, Seguridad y Buenas Prácticas, Control de Versiones con Git y Capturas de Pantalla), consulte el documento:
+👉 **[Documento de Evidencias de Entregables](docs/entregables/ENTREGABLES_DESARROLLO.md)**
+
+---
+

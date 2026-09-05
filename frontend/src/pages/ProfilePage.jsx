@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
-import { obtenerPerfil, actualizarPerfil } from "../data/mockData";
+import { obtenerPerfil } from "../data/mockData";
+import { productoraService } from "../services/productoraService";
 import {
   FaUser,
   FaStoreAlt,
@@ -42,6 +43,12 @@ export default function ProfilePage() {
   const [guardando, setGuardando] = useState(false);
   const [toastMensaje, setToastMensaje] = useState("");
 
+  useEffect(() => {
+    productoraService.getPerfilCompleto(1).then((data) => {
+      if (data) setPerfil(data);
+    });
+  }, []);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setPerfil((prev) => ({
@@ -50,16 +57,20 @@ export default function ProfilePage() {
     }));
   };
 
-  const handleGuardarPerfil = (e) => {
+  const handleGuardarPerfil = async (e) => {
     e.preventDefault();
     setGuardando(true);
 
-    setTimeout(() => {
-      actualizarPerfil(perfil);
-      setGuardando(false);
+    try {
+      const actualizado = await productoraService.actualizarPerfil(perfil.idProductora || 1, perfil);
+      if (actualizado) setPerfil(actualizado);
       setToastMensaje("¡Perfil actualizado con éxito!");
       setTimeout(() => setToastMensaje(""), 3000);
-    }, 400);
+    } catch (err) {
+      console.error("Error al actualizar perfil:", err);
+    } finally {
+      setGuardando(false);
+    }
   };
 
   return (

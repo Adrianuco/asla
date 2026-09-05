@@ -1,26 +1,48 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import ProductForm from "../components/products/ProductForm";
-import { obtenerProductos, actualizarProducto } from "../data/mockData";
+import { obtenerProductos } from "../data/mockData";
+import { productoService } from "../services/productoService";
 import { FaArrowLeft, FaExclamationCircle } from "react-icons/fa";
 
 export default function EditProductPage() {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const [producto, setProducto] = useState(() => { const p = obtenerProductos().find(x => x.idProducto === Number(id)); return p || null; });
-  const [cargando, setCargando] = useState(false);
+  const [producto, setProducto] = useState(() => {
+    const p = obtenerProductos().find(x => x.idProducto === Number(id));
+    return p || null;
+  });
+  const [cargando, setCargando] = useState(true);
   const [guardando, setGuardando] = useState(false);
 
+  useEffect(() => {
+    async function cargarProducto() {
+      try {
+        const prod = await productoService.getProductoById(id);
+        if (prod) {
+          setProducto(prod);
+        }
+      } catch (err) {
+        console.error("Error al cargar producto:", err);
+      } finally {
+        setCargando(false);
+      }
+    }
+    cargarProducto();
+  }, [id]);
 
-  const handleActualizarProducto = (datosActualizados) => {
+  const handleActualizarProducto = async (datosActualizados) => {
     setGuardando(true);
-    setTimeout(() => {
-      actualizarProducto(id, datosActualizados);
-      setGuardando(false);
-      // Redirigir al catálogo tras guardar
+    try {
+      await productoService.updateProducto(id, datosActualizados);
       navigate("/productos", { state: { mensajeToast: "¡Producto actualizado con éxito!" } });
-    }, 300);
+    } catch (err) {
+      console.error("Error al actualizar producto:", err);
+      alert("No se pudo actualizar el producto. Por favor intenta de nuevo.");
+    } finally {
+      setGuardando(false);
+    }
   };
 
   // Si está cargando

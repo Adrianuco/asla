@@ -1,21 +1,24 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import ProductForm from "../components/products/ProductForm";
-import { crearProducto } from "../data/mockData";
+import { productoService } from "../services/productoService";
 import { FaArrowLeft } from "react-icons/fa";
 
 export default function PublishProductPage() {
   const navigate = useNavigate();
   const [cargando, setCargando] = useState(false);
 
-  const handleGuardarProducto = (datosNuevoProducto) => {
+  const handleGuardarProducto = async (datosNuevoProducto) => {
     setCargando(true);
-    setTimeout(() => {
-      crearProducto(datosNuevoProducto);
-      setCargando(false);
-      // Redirigir al catálogo para ver el producto recién publicado
+    try {
+      await productoService.createProducto(datosNuevoProducto);
       navigate("/productos", { state: { mensajeToast: "¡Producto publicado con éxito!" } });
-    }, 300);
+    } catch (err) {
+      console.error("Error al publicar producto:", err);
+      alert("No se pudo publicar el producto. Por favor intenta de nuevo.");
+    } finally {
+      setCargando(false);
+    }
   };
 
   return (
