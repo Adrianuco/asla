@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { obtenerPerfil, actualizarPerfil } from "../data/mockData";
 import {
@@ -9,9 +10,9 @@ import {
   FaSave,
   FaSignOutAlt,
   FaCheck,
-  FaShoppingCart,
-  FaSeedling
+  FaCamera
 } from "react-icons/fa";
+import { IconoCanasta, IconoPlantaMaceta } from "../iconos";
 
 // Lista de departamentos de Nicaragua
 const DEPARTAMENTOS_NICARAGUA = [
@@ -36,11 +37,31 @@ const DEPARTAMENTOS_NICARAGUA = [
 
 export default function ProfilePage() {
   const { logout } = useAuth();
+  const navigate = useNavigate();
 
   const [perfil, setPerfil] = useState(() => obtenerPerfil());
   const [rolPerfil, setRolPerfil] = useState("productora"); // Productora seleccionada inicialmente por defecto
   const [guardando, setGuardando] = useState(false);
   const [toastMensaje, setToastMensaje] = useState("");
+  const fileInputRef = useRef(null);
+
+  const handleFotoChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const nuevaFoto = reader.result;
+        setPerfil((prev) => {
+          const actualizado = { ...prev, fotoUrl: nuevaFoto };
+          actualizarPerfil(actualizado);
+          return actualizado;
+        });
+        setToastMensaje("¡Foto de perfil actualizada con éxito!");
+        setTimeout(() => setToastMensaje(""), 3000);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -103,20 +124,62 @@ export default function ProfilePage() {
         textAlign: "center",
         gap: "14px"
       }}>
-        {/* Foto de Perfil / Avatar */}
-        <div style={{
-          position: "relative",
-          width: "84px",
-          height: "84px",
-          borderRadius: "var(--radius-full)",
-          overflow: "hidden",
-          border: "3px solid var(--color-primary)",
-          boxShadow: "var(--shadow-md)"
-        }}>
-          <img
-            src={perfil.fotoUrl || "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&auto=format&fit=crop&q=80"}
-            alt={perfil.nombre}
-            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+        {/* Foto de Perfil / Avatar con selector de foto */}
+        <div style={{ position: "relative", display: "inline-block" }}>
+          <div
+            onClick={() => fileInputRef.current?.click()}
+            style={{
+              position: "relative",
+              width: "88px",
+              height: "88px",
+              borderRadius: "var(--radius-full)",
+              overflow: "hidden",
+              border: "3.5px solid var(--color-primary)",
+              boxShadow: "var(--shadow-md)",
+              cursor: "pointer",
+              backgroundColor: "#FFFFFF"
+            }}
+            title="Haz clic para subir tu foto de perfil"
+          >
+            <img
+              src={perfil.fotoUrl || "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&auto=format&fit=crop&q=80"}
+              alt={perfil.nombre}
+              style={{ width: "100%", height: "100%", objectFit: "cover" }}
+            />
+          </div>
+
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            style={{
+              position: "absolute",
+              bottom: "0px",
+              right: "0px",
+              width: "28px",
+              height: "28px",
+              borderRadius: "50%",
+              backgroundColor: "var(--color-primary)",
+              color: "#FFFFFF",
+              border: "2px solid #FFFFFF",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: "pointer",
+              boxShadow: "0 2px 6px rgba(0, 0, 0, 0.2)",
+              transition: "transform 0.15s ease",
+            }}
+            title="Cambiar foto de perfil"
+            aria-label="Cambiar foto de perfil"
+          >
+            <FaCamera style={{ fontSize: "12px" }} />
+          </button>
+
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFotoChange}
+            accept="image/*"
+            style={{ display: "none" }}
           />
         </div>
 
@@ -164,20 +227,20 @@ export default function ProfilePage() {
               boxShadow: rolPerfil === "productora" ? "0 4px 12px rgba(225, 45, 134, 0.3)" : "none"
             }}
           >
-            <FaSeedling style={{ fontSize: "16px" }} /> Productora
+            <IconoPlantaMaceta size={19} color={rolPerfil === "productora" ? "#ffffff" : "#64748B"} /> Productora
           </button>
 
           {/* Opción 2 (Derecha): Compradora - Verde */}
           <button
             type="button"
-            onClick={() => setRolPerfil("compradora")}
+            onClick={() => navigate("/home")}
             style={{
               flex: 1,
               height: "44px",
               borderRadius: "var(--radius-full)",
               border: "none",
-              backgroundColor: rolPerfil === "compradora" ? "#16A34A" : "transparent",
-              color: rolPerfil === "compradora" ? "#ffffff" : "#64748B",
+              backgroundColor: "transparent",
+              color: "#64748B",
               fontSize: "0.92rem",
               fontWeight: "700",
               display: "flex",
@@ -185,11 +248,11 @@ export default function ProfilePage() {
               justifyContent: "center",
               gap: "8px",
               cursor: "pointer",
-              transition: "all 0.2s ease",
-              boxShadow: rolPerfil === "compradora" ? "0 4px 12px rgba(22, 163, 74, 0.3)" : "none"
+              transition: "all 0.2s ease"
             }}
+            title="Ir a la pantalla de Inicio de Compradora"
           >
-            <FaShoppingCart style={{ fontSize: "16px" }} /> Compradora
+            <IconoCanasta size={19} color="#64748B" /> Compradora
           </button>
         </div>
 

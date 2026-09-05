@@ -3,6 +3,8 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import LoginPage from "./pages/LoginPage";
 import RegisterProducerPage from "./pages/RegisterProducerPage";
+import RegisterUserPage from "./pages/RegisterUserPage";
+import CompradoraHomePage from "./pages/CompradoraHomePage";
 import AdminLayout from "./layouts/AdminLayout";
 import CatalogPage from "./pages/CatalogPage";
 import PublishProductPage from "./pages/PublishProductPage";
@@ -22,8 +24,16 @@ function AppRouter() {
           element={estaAutenticado ? <Navigate to="/productos" replace /> : <LoginPage />}
         />
         <Route
+          path="/registro"
+          element={<RegisterUserPage />}
+        />
+        <Route
           path="/registro-productora"
           element={<RegisterProducerPage />}
+        />
+        <Route
+          path="/home"
+          element={<CompradoraHomePage />}
         />
 
         {/* Rutas Privadas del Panel de la Productora */}

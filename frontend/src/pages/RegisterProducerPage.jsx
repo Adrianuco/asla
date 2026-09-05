@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useLocation, useNavigate, Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import {
   FaLeaf,
   FaChevronLeft,
@@ -37,6 +38,7 @@ const DEPARTAMENTOS_NICARAGUA = [
 export default function RegisterProducerPage() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { iniciarSesionRegistro } = useAuth();
 
   // Reutilizar los datos provenientes del Registro General (o valores por defecto limpios)
   const datosPrevios = location.state?.datosUsuario || {
@@ -51,7 +53,7 @@ export default function RegisterProducerPage() {
   // Estado del formulario combinando datos reutilizados + campos específicos de Productora (BD)
   const [formData, setFormData] = useState({
     // 1. Datos reutilizados del Registro General
-    correo: datosPrevios.correo || "",
+    correo: datosPrevios.correo || datosPrevios.email || "",
     cedula: datosPrevios.cedula || "",
     telefono: datosPrevios.telefono || "",
 
@@ -96,6 +98,15 @@ export default function RegisterProducerPage() {
     setTimeout(() => {
       setCargando(false);
       setExito(true);
+      if (iniciarSesionRegistro) {
+        iniciarSesionRegistro({
+          nombre: datosPrevios.nombre,
+          apellido: datosPrevios.apellido,
+          nombreEmprendimiento: formData.nombreEmprendimiento,
+          correo: formData.correo,
+          cedula: formData.cedula,
+        });
+      }
       setTimeout(() => {
         navigate("/productos");
       }, 1500);
