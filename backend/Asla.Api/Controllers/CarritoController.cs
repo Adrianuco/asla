@@ -1,4 +1,4 @@
-using Asla.Api.Models;
+using Asla.Api.DTOs.Carrito;
 using Asla.Api.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,50 +15,50 @@ public class CarritoController : ControllerBase
         _service = service;
     }
 
-    [HttpGet]
-    public async Task<IActionResult> GetCarritos()
+    [HttpGet("usuario/{usuarioId}")]
+    public async Task<ActionResult<CarritoDto>> GetCarritoUsuario(int usuarioId)
     {
-        var carritos = await _service.GetCarritos();
-        return Ok(carritos);
-    }
-
-    [HttpGet("{id}")]
-    public async Task<IActionResult> GetCarritoById(int id)
-    {
-        var carrito = await _service.GetCarritoById(id);
-        if (carrito == null)
-        {
-            return NotFound();
-        }
+        var carrito = await _service.GetCarritoByUsuarioIdAsync(usuarioId);
         return Ok(carrito);
     }
 
-    [HttpPost]
-    public async Task<IActionResult> CreateCarrito(Carrito carrito)
+    [HttpPost("item")]
+    public async Task<ActionResult<CarritoDto>> AgregarItem(AgregarItemCarritoDto dto)
     {
-        var nuevoCarrito = await _service.CreateCarrito(carrito);
-        return Ok(nuevoCarrito);
+        var carritoActualizado = await _service.AgregarItemCarritoAsync(dto);
+        return Ok(carritoActualizado);
     }
 
-    [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateCarrito(int id, Carrito carrito)
+    [HttpPut("item/{detalleCarritoId}")]
+    public async Task<ActionResult<CarritoDto>> ActualizarCantidadItem(int detalleCarritoId, [FromBody] ActualizarCantidadItemDto dto)
     {
-        var actualizado = await _service.UpdateCarrito(id, carrito);
-        if (!actualizado)
+        var carritoActualizado = await _service.ActualizarCantidadItemAsync(detalleCarritoId, dto.Cantidad);
+        if (carritoActualizado == null)
         {
             return NotFound();
         }
-        return Ok();
+        return Ok(carritoActualizado);
     }
 
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteCarrito(int id)
+    [HttpDelete("item/{detalleCarritoId}")]
+    public async Task<IActionResult> EliminarItem(int detalleCarritoId)
     {
-        var resultado = await _service.DeleteCarrito(id);
+        var resultado = await _service.EliminarItemCarritoAsync(detalleCarritoId);
         if (!resultado)
         {
             return NotFound();
         }
-        return Ok();
+        return NoContent();
+    }
+
+    [HttpDelete("vaciar/{usuarioId}")]
+    public async Task<IActionResult> VaciarCarrito(int usuarioId)
+    {
+        var resultado = await _service.VaciarCarritoAsync(usuarioId);
+        if (!resultado)
+        {
+            return NotFound();
+        }
+        return NoContent();
     }
 }

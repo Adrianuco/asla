@@ -1,0 +1,111 @@
+
+:root {
+  /* Paleta de Colores Principales (Estilo Figma - Rosa Vibrante) */
+  --color-primary: #E12D86;        /* Rosa/Fucsia vibrante principal */
+  --color-primary-dark: #B81D68;   /* Rosa oscuro para presionar botones */
+  --color-primary-light: #FCE7F3;  /* Rosa muy suave para fondos de etiquetas */
+  --color-secondary: #27C064;     /* Verde fresco para acentos y éxito */
+  --color-secondary-dark: #1E8A4D; /* Verde oscuro para hover */
+  --color-secondary-light: #E8F8EE; /* Verde muy suave para fondos de tarjetas */
+  
+  --color-earth: #8B5A2B;          /* Tono tierra / café artesanal */
+  --color-earth-light: #FDF6EE;    /* Fondo cálido tierra suave */
+  --color-terracotta: #C85A32;     /* Acento artesanal / barro */
+
+  /* Estados de Producto */
+  --color-active: #16A34A;         /* Verde para Activo (éxito) */
+  --color-active-bg: #DCFCE7;
+  --color-inactive: #64748B;       /* Gris suave para Inactivo */
+  --color-inactive-bg: #F1F5F9;
+  --color-barter: #D97706;         /* Ámbar cálido para Trueque */
+  --color-barter-bg: #FEF3C7;
+
+  /* Fondos y Textos */
+  --color-bg: #F9FAFB;             /* Gris neutro muy limpio para resaltar tarjetas */
+  --color-surface: #FFFFFF;        /* Superficie de tarjetas y modales */
+  --color-text-main: #111827;      /* Texto principal casi negro */
+  --color-text-muted: #6B7280;     /* Texto secundario / descripciones */
+  --color-border: #E5E7EB;         /* Bordes suaves */
+  --color-danger: #DC2626;         /* Alertas y eliminación */
+  --color-danger-bg: #FEE2E2;
+
+  /* Tipografía y Espaciado */
+  --font-family: 'Metropolis', system-ui, -apple-system, sans-serif;
+  --radius-sm: 10px;
+  --radius-md: 16px;               /* Más redondeado estilo Figma */
+  --radius-lg: 24px;               /* Tarjetas muy suaves */
+  --radius-full: 9999px;           /* Para botones estilo "píldora" */
+
+  /* Sombras modernas y difuminadas (estilo app nativa) */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 16px 32px rgba(0, 0, 0, 0.08);
+}
+
+/* Reset básico */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-family);
+  background-color: var(--color-bg);
+  color: var(--color-text-main);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Contenedor de la aplicación centrado y optimizado para móvil */
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Tipografía base */
+h1, h2, h3, h4 {
+  font-weight: 700;
+  color: var(--color-text-main);
+  line-height: 1.25;
+}
+
+p {
+  color: var(--color-text-muted);
+}
+
+/* Botones estándar para móvil (fáciles de presionar con el pulgar) */
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  outline: none;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+button:active {
+  transform: scale(0.98);
+}
+
+/* Inputs y Formularios */
+input, textarea, select {
+  font-family: inherit;
+  font-size: 1rem;
+  width: 100%;
+  border-radius: var(--radius-md);
+  border: 1.5px solid var(--color-border);
+  padding: 12px 14px;
+  background-color: var(--color-surface);
+  color: var(--color-text-main);
+  transition: border-color 0.2s ease;
+}
+
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-light);
+}

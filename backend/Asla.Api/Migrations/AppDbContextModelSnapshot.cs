@@ -161,6 +161,23 @@ namespace Asla.Api.Migrations
                     b.ToTable("DetallesTrueque");
                 });
 
+            modelBuilder.Entity("Asla.Api.Models.Etiqueta", b =>
+                {
+                    b.Property<int>("EtiquetaId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("EtiquetaId"));
+
+                    b.Property<string>("Nombre")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("EtiquetaId");
+
+                    b.ToTable("Etiquetas");
+                });
+
             modelBuilder.Entity("Asla.Api.Models.Factura", b =>
                 {
                     b.Property<int>("FacturaId")
@@ -254,6 +271,9 @@ namespace Asla.Api.Migrations
                     b.Property<DateTime>("FechaPublicacion")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("ImagenUrl")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Nombre")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -308,6 +328,9 @@ namespace Asla.Api.Migrations
                     b.Property<DateTime?>("FechaVerificacion")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("ImagenUrl")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("NombreEmprendimiento")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -326,6 +349,21 @@ namespace Asla.Api.Migrations
                         .IsUnique();
 
                     b.ToTable("Productoras");
+                });
+
+            modelBuilder.Entity("Asla.Api.Models.ProductoraEtiqueta", b =>
+                {
+                    b.Property<int>("ProductoraId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("EtiquetaId")
+                        .HasColumnType("int");
+
+                    b.HasKey("ProductoraId", "EtiquetaId");
+
+                    b.HasIndex("EtiquetaId");
+
+                    b.ToTable("ProductoraEtiquetas");
                 });
 
             modelBuilder.Entity("Asla.Api.Models.Rol", b =>
@@ -630,6 +668,25 @@ namespace Asla.Api.Migrations
                     b.Navigation("Usuario");
                 });
 
+            modelBuilder.Entity("Asla.Api.Models.ProductoraEtiqueta", b =>
+                {
+                    b.HasOne("Asla.Api.Models.Etiqueta", "Etiqueta")
+                        .WithMany("ProductoraEtiquetas")
+                        .HasForeignKey("EtiquetaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Asla.Api.Models.Productora", "Productora")
+                        .WithMany("ProductoraEtiquetas")
+                        .HasForeignKey("ProductoraId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Etiqueta");
+
+                    b.Navigation("Productora");
+                });
+
             modelBuilder.Entity("Asla.Api.Models.Trueque", b =>
                 {
                     b.HasOne("Asla.Api.Models.Productora", "Productora")
@@ -670,6 +727,11 @@ namespace Asla.Api.Migrations
                     b.Navigation("Productos");
                 });
 
+            modelBuilder.Entity("Asla.Api.Models.Etiqueta", b =>
+                {
+                    b.Navigation("ProductoraEtiquetas");
+                });
+
             modelBuilder.Entity("Asla.Api.Models.Pedido", b =>
                 {
                     b.Navigation("DetallesPedido");
@@ -689,6 +751,8 @@ namespace Asla.Api.Migrations
             modelBuilder.Entity("Asla.Api.Models.Productora", b =>
                 {
                     b.Navigation("Pedidos");
+
+                    b.Navigation("ProductoraEtiquetas");
 
                     b.Navigation("Productos");
 

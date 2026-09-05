@@ -12,6 +12,7 @@ public class Producto
     public bool PermiteTrueque { get; set; }
     public DateTime FechaPublicacion { get; set; }
     public bool Estado { get; set; }
+    public string? ImagenUrl { get; set; }
 
     // Foreign Keys (FK)
     public int CategoriaId { get; set; }
@@ -19,9 +20,9 @@ public class Producto
     public int ProductoraId { get; set; }
 
     // navegacion
-    public Categoria Categoria { get; set; } = null!;
-    public Productora Productora { get; set; } = null!;
-    public UnidadMedida UnidadMedida { get; set; } = null!;
+    public Categoria? Categoria { get; set; }
+    public Productora? Productora { get; set; }
+    public UnidadMedida? UnidadMedida { get; set; }
 
     // Relaciones (1:N)
     [JsonIgnore]

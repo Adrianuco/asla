@@ -18,7 +18,7 @@ public class Usuario
     public bool Estado { get; set; }
 
     // Navegación
-    public Rol Rol { get; set; } = null!;
+    public Rol? Rol { get; set; }
     
     // Relación 1:1 con Productora (Usuario es el principal, Productora es el dependiente con FK)
     public Productora? Productora { get; set; }

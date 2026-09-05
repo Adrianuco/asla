@@ -1,5 +1,4 @@
-﻿using Asla.Api.Models;
-using Asla.Api.Services;
+﻿using Asla.Api.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Asla.Api.Controllers;
@@ -16,54 +15,21 @@ public class DetallePedidoController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetDetallePedidos()
+    public async Task<IActionResult> GetDetalles([FromQuery] int? pedidoId)
     {
-        var detallePedidos = await _service.GetDetallePedido();
-
-        return Ok(detallePedidos);
+        var detalles = await _service.GetDetalles(pedidoId);
+        return Ok(detalles);
     }
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetDetallePedidoById(int id)
+    public async Task<IActionResult> GetDetalleById(int id)
     {
-        var detallePedido = await _service.GetDetallePedidoById(id);
-
-        if (detallePedido == null)
+        var detalle = await _service.GetDetalleById(id);
+        if (detalle == null)
         {
-            return NotFound();
+            return NotFound(new { mensaje = $"No se encontró el detalle con ID {id}." });
         }
 
-        return Ok(detallePedido);
-    }
-
-    [HttpPost]
-    public async Task<IActionResult> CreateDetallePedido(DetallePedido detallePedido)
-    {
-        var nuevoDetallePedido = await _service.CreateDetallePedido(detallePedido);
-        return Ok(nuevoDetallePedido);
-    }
-
-    [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateDetallePedido(int id, DetallePedido detallePedido)
-    {
-        var actualizado = await _service.UpdateDetallePedido(id, detallePedido);
-        if (!actualizado)
-        {
-            return NotFound();
-        }
-        return Ok();
-    }
-
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteDetallePedido(int id)
-    {
-        var resultado = await _service.DeleteDetallePedido(id);
-
-        if (!resultado)
-        {
-            return NotFound();
-        }
-
-        return Ok();
+        return Ok(detalle);
     }
 }

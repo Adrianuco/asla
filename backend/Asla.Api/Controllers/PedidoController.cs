@@ -1,4 +1,4 @@
-﻿using Asla.Api.Models;
+﻿using Asla.Api.DTOs.Pedidos;
 using Asla.Api.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,10 +16,12 @@ public class PedidoController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetPedidos()
+    public async Task<IActionResult> GetPedidos(
+        [FromQuery] int? usuarioId,
+        [FromQuery] int? productoraId,
+        [FromQuery] string? estado)
     {
-        var pedidos = await _service.GetPedidos();
-
+        var pedidos = await _service.GetPedidos(usuarioId, productoraId, estado);
         return Ok(pedidos);
     }
 
@@ -27,43 +29,71 @@ public class PedidoController : ControllerBase
     public async Task<IActionResult> GetPedidoById(int id)
     {
         var pedido = await _service.GetPedidoById(id);
-
         if (pedido == null)
         {
-            return NotFound();
+            return NotFound(new { mensaje = $"No se encontró el pedido con ID {id}." });
         }
 
         return Ok(pedido);
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreatePedido(Pedido pedido)
+    public async Task<IActionResult> CreatePedido([FromBody] CrearPedidoDto dto)
     {
-        var nuevoPedido = await _service.CreatePedido(pedido);
-        return Ok(nuevoPedido);
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        try
+        {
+            var nuevoPedido = await _service.CreatePedido(dto);
+            return CreatedAtAction(nameof(GetPedidoById), new { id = nuevoPedido.PedidoId }, nuevoPedido);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { mensaje = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { mensaje = ex.Message });
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { mensaje = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { mensaje = "Ocurrió un error inesperado al procesar el pedido.", detalle = ex.Message });
+        }
     }
 
-    [HttpPut("{id}")]
-    public async Task<IActionResult> UpdatePedido(int id, Pedido pedido)
+    [HttpPatch("{id}/estado")]
+    public async Task<IActionResult> ActualizarEstado(int id, [FromBody] ActualizarEstadoPedidoDto dto)
     {
-        var actualizado = await _service.UpdatePedido(id, pedido);
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        var actualizado = await _service.UpdateEstadoPedido(id, dto.Estado);
         if (!actualizado)
         {
-            return NotFound();
+            return NotFound(new { mensaje = $"No se encontró el pedido con ID {id}." });
         }
-        return Ok();
+
+        return Ok(new { mensaje = "Estado del pedido actualizado correctamente.", nuevoEstado = dto.Estado });
     }
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeletePedido(int id)
     {
         var resultado = await _service.DeletePedido(id);
-
         if (!resultado)
         {
-            return NotFound();
+            return NotFound(new { mensaje = $"No se encontró el pedido con ID {id}." });
         }
 
-        return Ok();
+        return Ok(new { mensaje = "Pedido eliminado correctamente." });
     }
 }

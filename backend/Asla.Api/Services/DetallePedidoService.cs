@@ -1,71 +1,63 @@
 ﻿using Asla.Api.Data;
-using Asla.Api.Models;
+using Asla.Api.DTOs.Pedidos;
 using Microsoft.EntityFrameworkCore;
 
-namespace Asla.Api.Services
+namespace Asla.Api.Services;
+
+public class DetallePedidoService
 {
-    public class DetallePedidoService
+    private readonly AppDbContext _context;
+
+    public DetallePedidoService(AppDbContext context)
     {
-        private readonly AppDbContext _context;
+        _context = context;
+    }
 
-        public DetallePedidoService(AppDbContext context)
+    public async Task<List<DetallePedidoResponseDto>> GetDetalles(int? pedidoId = null)
+    {
+        var query = _context.DetallesPedido
+            .AsNoTracking()
+            .Include(dp => dp.Producto)
+            .AsQueryable();
+
+        if (pedidoId.HasValue)
         {
-            _context = context;
+            query = query.Where(dp => dp.PedidoId == pedidoId.Value);
         }
 
-        public async Task<List<DetallePedido>> GetDetallePedido()
+        var detalles = await query.ToListAsync();
+
+        return detalles.Select(dp => new DetallePedidoResponseDto
         {
-            // se agrega el Include para que EF haga un join con la tabla de categorias 
-            // y traiga la información de la categoria asociada a cada producto
-            return await _context.DetallesPedido.Include(dp => dp.Pedido).Include(dp => dp.Producto).ToListAsync();
+            DetallePedidoId = dp.DetallePedidoId,
+            ProductoId = dp.ProductoId,
+            NombreProducto = dp.Producto?.Nombre ?? string.Empty,
+            Cantidad = dp.Cantidad,
+            PrecioUnitario = dp.PrecioUnitario,
+            Subtotal = dp.Subtotal
+        }).ToList();
+    }
+
+    public async Task<DetallePedidoResponseDto?> GetDetalleById(int id)
+    {
+        var dp = await _context.DetallesPedido
+            .AsNoTracking()
+            .Include(d => d.Producto)
+            .FirstOrDefaultAsync(d => d.DetallePedidoId == id);
+
+        if (dp == null)
+        {
+            return null;
         }
 
-        public async Task<DetallePedido?> GetDetallePedidoById(int id)
+        return new DetallePedidoResponseDto
         {
-            return await _context.DetallesPedido.Include(dp => dp.Pedido).Include(dp => dp.Producto).FirstOrDefaultAsync(dp => dp.DetallePedidoId == id);
-        }
-
-        public async Task<DetallePedido> CreateDetallePedido(DetallePedido detallePedido)
-        {
-            _context.DetallesPedido.Add(detallePedido);
-            await _context.SaveChangesAsync();
-            return detallePedido;
-        }
-
-        public async Task<bool> DeleteDetallePedido(int id)
-        {
-            var detallePedido = await _context.DetallesPedido.FirstOrDefaultAsync(dp => dp.DetallePedidoId == id);
-
-            if (detallePedido == null)
-            {
-                return false;
-            }
-
-            _context.DetallesPedido.Remove(detallePedido);
-
-            await _context.SaveChangesAsync();
-
-            return true;
-        }
-
-        public async Task<bool> UpdateDetallePedido(int id, DetallePedido detallePedido)
-        {
-            var detallePedidoExistente = await _context.DetallesPedido.FirstOrDefaultAsync(dp => dp.DetallePedidoId == id);
-
-            if (detallePedidoExistente == null)
-            {
-                return false;
-            }
-
-            detallePedidoExistente.Pedido = detallePedido.Pedido;
-            detallePedidoExistente.Producto = detallePedido.Producto;
-            detallePedidoExistente.Cantidad = detallePedido.Cantidad;
-            detallePedidoExistente.PrecioUnitario = detallePedido.PrecioUnitario;
-            detallePedidoExistente.Subtotal = detallePedido.Subtotal;
-
-            await _context.SaveChangesAsync();
-
-            return true;
-        }
+            DetallePedidoId = dp.DetallePedidoId,
+            ProductoId = dp.ProductoId,
+            NombreProducto = dp.Producto?.Nombre ?? string.Empty,
+            Cantidad = dp.Cantidad,
+            PrecioUnitario = dp.PrecioUnitario,
+            Subtotal = dp.Subtotal
+        };
     }
 }

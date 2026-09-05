@@ -13,12 +13,16 @@ public class Productora
     public DateTime FechaSolicitud { get; set; }
     public DateTime? FechaVerificacion { get; set; }
     public bool Estado { get; set; }
+    public string? ImagenUrl { get; set; }
 
     // Navegación
-    public Usuario Usuario { get; set; } = null!;
-    public Ubicacion Ubicacion { get; set; } = null!;
+    public Usuario? Usuario { get; set; }
+    public Ubicacion? Ubicacion { get; set; }
 
-    // Relaciones (1:N)
+    // Relaciones N:N y 1:N
+    [JsonIgnore]
+    public ICollection<ProductoraEtiqueta> ProductoraEtiquetas { get; set; } = new List<ProductoraEtiqueta>();
+
     [JsonIgnore]
     public ICollection<Producto> Productos { get; set; } = new List<Producto>();
 

@@ -1,71 +1,63 @@
 ﻿using Asla.Api.Data;
-using Asla.Api.Models;
+using Asla.Api.DTOs.Trueques;
 using Microsoft.EntityFrameworkCore;
 
-namespace Asla.Api.Services
+namespace Asla.Api.Services;
+
+public class DetalleTruequeService
 {
-    public class DetalleTruequeService
+    private readonly AppDbContext _context;
+
+    public DetalleTruequeService(AppDbContext context)
     {
-        private readonly AppDbContext _context;
+        _context = context;
+    }
 
-        public DetalleTruequeService(AppDbContext context)
+    public async Task<List<DetalleTruequeResponseDto>> GetDetalles(int? truequeId = null)
+    {
+        var query = _context.DetallesTrueque
+            .AsNoTracking()
+            .Include(dt => dt.Producto)
+            .AsQueryable();
+
+        if (truequeId.HasValue)
         {
-            _context = context;
+            query = query.Where(dt => dt.TruequeId == truequeId.Value);
         }
 
-        public async Task<List<DetalleTrueque>> GetDetalleTrueques()
+        var detalles = await query.ToListAsync();
+
+        return detalles.Select(dt => new DetalleTruequeResponseDto
         {
-            // se agrega el Include para que EF haga un join con la tabla de categorias 
-            // y traiga la información de la categoria asociada a cada producto
-            return await _context.DetallesTrueque.Include(dt => dt.Trueque).Include(dt => dt.Producto).ToListAsync();
+            DetalleTruequeId = dt.DetalleTruequeId,
+            ProductoId = dt.ProductoId,
+            NombreProducto = dt.Producto?.Nombre ?? string.Empty,
+            TipoOferta = dt.TipoOferta,
+            Cantidad = dt.Cantidad,
+            Descripcion = dt.Descripcion
+        }).ToList();
+    }
+
+    public async Task<DetalleTruequeResponseDto?> GetDetalleById(int id)
+    {
+        var dt = await _context.DetallesTrueque
+            .AsNoTracking()
+            .Include(d => d.Producto)
+            .FirstOrDefaultAsync(d => d.DetalleTruequeId == id);
+
+        if (dt == null)
+        {
+            return null;
         }
 
-        public async Task<DetalleTrueque?> GetDetalleTruequeById(int id)
+        return new DetalleTruequeResponseDto
         {
-            return await _context.DetallesTrueque.Include(dt => dt.Trueque).Include(dt => dt.Producto).FirstOrDefaultAsync(dt => dt.DetalleTruequeId == id);
-        }
-
-        public async Task<DetalleTrueque> CreateDetalleTrueque(DetalleTrueque detalletrueque)
-        {
-            _context.DetallesTrueque.Add(detalletrueque);
-            await _context.SaveChangesAsync();
-            return detalletrueque;
-        }
-
-        public async Task<bool> DeleteDetalleTrueque(int id)
-        {
-            var detalletrueque = await _context.DetallesTrueque.FirstOrDefaultAsync(dt => dt.DetalleTruequeId == id);
-
-            if (detalletrueque == null)
-            {
-                return false;
-            }
-
-            _context.DetallesTrueque.Remove(detalletrueque);
-
-            await _context.SaveChangesAsync();
-
-            return true;
-        }
-
-        public async Task<bool> UpdateDetalleTrueque(int id, DetalleTrueque detalletrueque)
-        {
-            var detalleTruequeExistente = await _context.DetallesTrueque.FirstOrDefaultAsync(dt => dt.DetalleTruequeId == id);
-
-            if (detalleTruequeExistente == null)
-            {
-                return false;
-            }
-
-            detalleTruequeExistente.Trueque = detalletrueque.Trueque;
-            detalleTruequeExistente.Producto = detalletrueque.Producto;
-            detalleTruequeExistente.TipoOferta = detalletrueque.TipoOferta;
-            detalleTruequeExistente.Cantidad = detalletrueque.Cantidad;
-            detalleTruequeExistente.Descripcion = detalletrueque.Descripcion;
-
-            await _context.SaveChangesAsync();
-
-            return true;
-        }
+            DetalleTruequeId = dt.DetalleTruequeId,
+            ProductoId = dt.ProductoId,
+            NombreProducto = dt.Producto?.Nombre ?? string.Empty,
+            TipoOferta = dt.TipoOferta,
+            Cantidad = dt.Cantidad,
+            Descripcion = dt.Descripcion
+        };
     }
 }
