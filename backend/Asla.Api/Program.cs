@@ -37,6 +37,8 @@ builder.Services.AddScoped<ProductoraService>();
 builder.Services.AddScoped<UnidadMedidaService>();
 builder.Services.AddScoped<CarritoService>();
 builder.Services.AddScoped<DetalleCarritoService>();
+builder.Services.AddScoped<HomeService>();
+builder.Services.AddScoped<EtiquetaService>();
 
 var app = builder.Build();
 

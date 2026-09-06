@@ -1,4 +1,4 @@
-using Asla.Api.Models;
+using Asla.Api.DTOs.Productora;
 using Asla.Api.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,16 +16,18 @@ public class ProductoraController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetProductoras()
+    public async Task<ActionResult<List<ProductoraListDto>>> GetProductoras(
+        [FromQuery] string? municipio,
+        [FromQuery] string? busqueda)
     {
-        var productoras = await _service.GetProductoras();
+        var productoras = await _service.GetProductorasAsync(municipio, busqueda);
         return Ok(productoras);
     }
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetProductoraById(int id)
+    public async Task<ActionResult<ProductoraDetalleDto>> GetProductoraById(int id)
     {
-        var productora = await _service.GetProductoraById(id);
+        var productora = await _service.GetProductoraByIdAsync(id);
         if (productora == null)
         {
             return NotFound();
@@ -34,31 +36,31 @@ public class ProductoraController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreateProductora(Productora productora)
+    public async Task<ActionResult<ProductoraDetalleDto>> CreateProductora(CrearProductoraDto dto)
     {
-        var nuevaProductora = await _service.CreateProductora(productora);
-        return Ok(nuevaProductora);
+        var nuevaProductora = await _service.CreateProductoraAsync(dto);
+        return CreatedAtAction(nameof(GetProductoraById), new { id = nuevaProductora.ProductoraId }, nuevaProductora);
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateProductora(int id, Productora productora)
+    public async Task<IActionResult> UpdateProductora(int id, ActualizarProductoraDto dto)
     {
-        var actualizado = await _service.UpdateProductora(id, productora);
+        var actualizado = await _service.UpdateProductoraAsync(id, dto);
         if (!actualizado)
         {
             return NotFound();
         }
-        return Ok();
+        return NoContent();
     }
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteProductora(int id)
     {
-        var resultado = await _service.DeleteProductora(id);
+        var resultado = await _service.DeleteProductoraAsync(id);
         if (!resultado)
         {
             return NotFound();
         }
-        return Ok();
+        return NoContent();
     }
 }

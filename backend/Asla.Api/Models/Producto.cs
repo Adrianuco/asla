@@ -12,6 +12,7 @@ public class Producto
     public bool PermiteTrueque { get; set; }
     public DateTime FechaPublicacion { get; set; }
     public bool Estado { get; set; }
+    public string? ImagenUrl { get; set; }
 
     // Foreign Keys (FK)
     public int CategoriaId { get; set; }
