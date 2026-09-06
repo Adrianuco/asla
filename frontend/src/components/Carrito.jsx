@@ -7,8 +7,17 @@ import {
   IconoUbicacion,
 } from '../iconos';
 
+export function formatWhatsAppNumber(rawPhone) {
+  if (!rawPhone) return '';
+  const digits = String(rawPhone).replace(/\D/g, '');
+  if (digits.length === 8) return '505' + digits;
+  if (digits.length === 11 && digits.startsWith('505')) return digits;
+  return digits;
+}
+
 const Carrito = ({
   cart = [],
+  producers = [],
   onBack = () => {},
   onUpdateQuantity = () => {},
   onRemoveItem = () => {},
@@ -24,10 +33,17 @@ const Carrito = ({
     cart.forEach((item) => {
       const producerName = item.producer || 'Productora Solidaria';
       if (!groups[producerName]) {
+        // Si el item no tiene teléfono, buscar en la lista de productoras
+        const foundProducer = Array.isArray(producers)
+          ? producers.find((p) => p.id === item.producerId || p.name === producerName)
+          : null;
+        const matchedPhone = item.producerPhone || item.phone || foundProducer?.phone || '';
+
         groups[producerName] = {
           producer: producerName,
-          location: item.location || 'Nicaragua',
-          phone: item.phone || '505......',
+          producerId: item.producerId,
+          location: item.location || foundProducer?.location || 'Nicaragua',
+          phone: matchedPhone,
           items: [],
           subtotal: 0,
           totalQty: 0,
@@ -38,11 +54,12 @@ const Carrito = ({
       groups[producerName].totalQty += item.quantity;
     });
     return Object.values(groups);
-  }, [cart]);
+  }, [cart, producers]);
 
-  // Enviar pedido a la productora 
+  // Enviar pedido a la productora individual
   const handleWhatsAppProducerOrder = (group) => {
-    const phone = group.phone || '505........';
+    const rawPhone = group.phone || '';
+    const phone = formatWhatsAppNumber(rawPhone) || '50588991122';
     const itemsList = group.items
       .map(
         (item) =>
@@ -59,27 +76,6 @@ const Carrito = ({
       `¿Tenés disponibilidad para coordinar la entrega o trueque solidario?`
     );
 
-    window.open(`https://wa.me/${phone}?text=${text}`, '_blank');
-  };
-
-  // Enviar pedido completo a la Red de Productoras
-  const handleWhatsAppCheckoutAll = () => {
-    if (cart.length === 0) return;
-
-    let itemsText = cart
-      .map(
-        (item) =>
-          `• ${item.quantity}x ${item.title} (C$ ${item.price * item.quantity}) - Productora: ${item.producer}`
-      )
-      .join('\n');
-    const phone = '50588991122';
-    const text = encodeURIComponent(
-      `¡Hola Red de Productoras Asla! 🌾🛒\n` +
-      `Deseo coordinar la compra de los siguientes productos de mi carrito:\n\n` +
-      `${itemsText}\n\n` +
-      `*Total a pagar: C$ ${totalAmount}*\n\n` +
-      `¿Me podrían confirmar la disponibilidad y el punto de encuentro?`
-    );
     window.open(`https://wa.me/${phone}?text=${text}`, '_blank');
   };
 
@@ -266,14 +262,20 @@ const Carrito = ({
               </div>
 
               {producerGroups.length > 1 && (
-                <button
-                  type="button"
-                  className="cart-checkout-all-whatsapp-btn"
-                  onClick={handleWhatsAppCheckoutAll}
-                >
-                  <IconoWhatsApp className="whatsapp-main-icon" size={22} color="#FFFFFF" />
-                  <span>Coordinar Todo el Pedido por WhatsApp</span>
-                </button>
+                <div style={{
+                  backgroundColor: '#F0FDF4',
+                  border: '1px solid #BBF7D0',
+                  borderRadius: '12px',
+                  padding: '10px 14px',
+                  fontSize: '0.82rem',
+                  color: '#166534',
+                  textAlign: 'center',
+                  margin: '12px 0',
+                  fontWeight: '600',
+                  lineHeight: '1.4'
+                }}>
+                  🌾 Tienes productos de <strong>{producerGroups.length} productoras distintas</strong>. Envía el pedido directamente a cada una utilizando el botón verde de WhatsApp de su sección.
+                </div>
               )}
 
               <button

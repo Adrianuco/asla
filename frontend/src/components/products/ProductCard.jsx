@@ -1,10 +1,9 @@
 import { Link } from "react-router-dom";
 import StatusBadge from "../common/StatusBadge";
-import { UNIDADES_MEDIDA } from "../../data/mockData";
 import { FaTrashAlt, FaPencilAlt, FaRegCalendarAlt, FaExchangeAlt } from "react-icons/fa";
 
 export default function ProductCard({ producto, onEliminar }) {
-  const unidad = UNIDADES_MEDIDA.find(u => u.idUnidadMedida === producto.idUnidadMedida)?.nombre || "";
+  const unidad = producto.unidadMedidaNombre || "";
   const esSoloTrueque = producto.permiteTrueque && (!producto.permiteVenta || producto.precio === 0);
 
   const formatearFecha = (fechaStr) => {

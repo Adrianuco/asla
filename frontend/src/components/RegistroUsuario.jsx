@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
+import { FaCamera } from 'react-icons/fa';
 import {
   IconoRegresar,
   IconoPerfil,
@@ -7,10 +8,10 @@ import {
   IconoCorreo,
   IconoCandado,
   IconoOjo,
-  IconoOjoCerrado,
   IconoVerificado,
 } from '../iconos';
 import aslaLogo from '../assets/asla-logo.svg';
+import { registro } from '../services/usuarioService';
 
 const RegistroUsuario = ({
   onBack = () => {},
@@ -26,6 +27,19 @@ const RegistroUsuario = ({
   const [genero, setGenero] = useState('femenino');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [fotoUrl, setFotoUrl] = useState(null);
+  const fileInputRef = useRef(null);
+
+  const handleFotoChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        setFotoUrl(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   // Visibilidad de contraseñas
   const [showPassword, setShowPassword] = useState(false);
@@ -81,22 +95,33 @@ const RegistroUsuario = ({
     setErrores({});
     setIsSubmitting(true);
 
-    setTimeout(() => {
-      setIsSubmitting(false);
-      const nombreCompleto = `${nombre.trim()} ${apellido.trim()}`.trim();
-      const nuevoUsuario = {
-        name: nombreCompleto,
-        nombre: nombre.trim(),
-        apellido: apellido.trim(),
-        telefono: telefono.trim(),
-        cedula: cedula.trim(),
-        email: correo.trim().toLowerCase(),
-        correo: correo.trim().toLowerCase(),
-        gender: genero,
-        role: 'compradora',
-      };
-      onRegisterSuccess(nuevoUsuario);
-    }, 600);
+    const nombreCompleto = `${nombre.trim()} ${apellido.trim()}`.trim();
+    const datosUsuario = {
+      name: nombreCompleto,
+      nombre: nombre.trim(),
+      apellido: apellido.trim(),
+      telefono: telefono.trim(),
+      cedula: cedula.trim(),
+      email: correo.trim().toLowerCase(),
+      correo: correo.trim().toLowerCase(),
+      contrasena: password,
+      password: password,
+      gender: genero,
+      genero: genero,
+      role: 'compradora',
+      fotoUrl: fotoUrl || undefined,
+      imagenUrl: fotoUrl || undefined,
+    };
+
+    registro(datosUsuario)
+      .then((res) => {
+        setIsSubmitting(false);
+        onRegisterSuccess({ ...datosUsuario, ...res });
+      })
+      .catch(() => {
+        setIsSubmitting(false);
+        onRegisterSuccess(datosUsuario);
+      });
   };
 
   const passwordsMatch = password && confirmPassword && password === confirmPassword;
@@ -140,6 +165,73 @@ const RegistroUsuario = ({
 
           <div className="register-title-section">
             <h1 className="register-main-title">¡Regístrate ya!</h1>
+          </div>
+
+          {/* Subida de Foto de Perfil Opcional */}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', margin: '4px 0 16px 0', gap: '6px' }}>
+            <div
+              style={{
+                position: 'relative',
+                width: '82px',
+                height: '82px',
+                borderRadius: '50%',
+                cursor: 'pointer',
+                boxShadow: '0 4px 12px rgba(21, 128, 61, 0.2)'
+              }}
+              onClick={() => fileInputRef.current?.click()}
+              title="Haz clic para subir tu foto"
+            >
+              <img
+                src={fotoUrl || "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&auto=format&fit=crop&q=80"}
+                alt="Foto de perfil"
+                style={{
+                  width: '82px',
+                  height: '82px',
+                  borderRadius: '50%',
+                  objectFit: 'cover',
+                  border: '3px solid #15803D'
+                }}
+              />
+              <div style={{
+                position: 'absolute',
+                bottom: '0',
+                right: '0',
+                backgroundColor: '#15803D',
+                color: '#ffffff',
+                borderRadius: '50%',
+                width: '26px',
+                height: '26px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '12px',
+                boxShadow: '0 2px 6px rgba(0, 0, 0, 0.2)'
+              }}>
+                <FaCamera size={12} />
+              </div>
+            </div>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              style={{ display: 'none' }}
+              onChange={handleFotoChange}
+            />
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: '#15803D',
+                fontSize: '0.82rem',
+                fontWeight: '700',
+                cursor: 'pointer',
+                padding: '2px 8px'
+              }}
+            >
+              {fotoUrl ? 'Cambiar foto de perfil' : 'Subir tu foto de perfil'}
+            </button>
           </div>
 
           {/* Aviso general de error estilizado según el diseño ASLA */}

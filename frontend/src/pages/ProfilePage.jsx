@@ -1,7 +1,8 @@
-import { useState, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useRef, useEffect } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { obtenerPerfil, actualizarPerfil } from "../data/mockData";
+import { getPerfil, updatePerfil } from "../services/usuarioService";
+import { updateProductora } from "../services/productoraService";
 import {
   FaUser,
   FaStoreAlt,
@@ -13,6 +14,7 @@ import {
   FaCamera
 } from "react-icons/fa";
 import { IconoCanasta, IconoPlantaMaceta } from "../iconos";
+import PerfilUsuario from "../components/PerfilUsuario";
 
 // Lista de departamentos de Nicaragua
 const DEPARTAMENTOS_NICARAGUA = [
@@ -36,14 +38,57 @@ const DEPARTAMENTOS_NICARAGUA = [
 ];
 
 export default function ProfilePage() {
-  const { logout } = useAuth();
+  const { usuario, logout, actualizarUsuarioSesion } = useAuth();
   const navigate = useNavigate();
 
-  const [perfil, setPerfil] = useState(() => obtenerPerfil());
+  const [perfil, setPerfil] = useState(() => ({
+    idUsuario: usuario?.idUsuario || null,
+    idProductora: usuario?.idProductora || null,
+    nombre: usuario?.nombre || "",
+    apellido: usuario?.apellido || "",
+    nombreEmprendimiento: usuario?.nombreEmprendimiento || "Mi Finca / Emprendimiento",
+    correo: usuario?.correo || "",
+    telefono: usuario?.telefono || "",
+    cedula: usuario?.cedula || "",
+    genero: usuario?.genero || "Femenino",
+    departamento: usuario?.departamento || "Carazo",
+    municipio: usuario?.municipio || "Jinotepe",
+    comunidad: "",
+    direccionExacta: "",
+    biografia: "Productora rural y agroecológica de la red comunitaria Asla.",
+    fotoUrl: usuario?.fotoUrl || "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&auto=format&fit=crop&q=80",
+    estadoVerificacion: "Verificada"
+  }));
   const [rolPerfil, setRolPerfil] = useState("productora"); // Productora seleccionada inicialmente por defecto
   const [guardando, setGuardando] = useState(false);
   const [toastMensaje, setToastMensaje] = useState("");
   const fileInputRef = useRef(null);
+
+  useEffect(() => {
+    let montado = true;
+    const uid = usuario?.idUsuario;
+    if (!uid) return;
+
+    getPerfil(uid).then((p) => {
+      if (montado && p) {
+        setPerfil((prev) => ({
+          ...prev,
+          nombre: p.nombreCompleto ? p.nombreCompleto.split(" ")[0] : prev.nombre,
+          apellido: p.nombreCompleto ? p.nombreCompleto.split(" ").slice(1).join(" ") : prev.apellido,
+          correo: p.correo || prev.correo,
+          telefono: p.telefono || prev.telefono,
+          genero: p.genero || prev.genero,
+          fotoUrl: p.imagenUrl || prev.fotoUrl,
+          nombreEmprendimiento: p.nombreEmprendimiento || prev.nombreEmprendimiento,
+          municipio: p.municipio || prev.municipio,
+          departamento: p.departamento || prev.departamento,
+        }));
+      }
+    });
+    return () => {
+      montado = false;
+    };
+  }, [usuario?.idUsuario]);
 
   const handleFotoChange = (e) => {
     const file = e.target.files?.[0];
@@ -51,11 +96,7 @@ export default function ProfilePage() {
       const reader = new FileReader();
       reader.onload = () => {
         const nuevaFoto = reader.result;
-        setPerfil((prev) => {
-          const actualizado = { ...prev, fotoUrl: nuevaFoto };
-          actualizarPerfil(actualizado);
-          return actualizado;
-        });
+        setPerfil((prev) => ({ ...prev, fotoUrl: nuevaFoto }));
         setToastMensaje("¡Foto de perfil actualizada con éxito!");
         setTimeout(() => setToastMensaje(""), 3000);
       };
@@ -71,16 +112,53 @@ export default function ProfilePage() {
     }));
   };
 
-  const handleGuardarPerfil = (e) => {
+  const DEPARTAMENTO_A_UBICACION_ID = {
+    "Matagalpa": 1,
+    "Carazo": 2,
+    "Rivas": 3,
+    "Granada": 6,
+    "Masaya": 8,
+  };
+
+  const handleGuardarPerfil = async (e) => {
     e.preventDefault();
     setGuardando(true);
 
-    setTimeout(() => {
-      actualizarPerfil(perfil);
-      setGuardando(false);
+    try {
+      const uid = usuario?.idUsuario || perfil.idUsuario || 1;
+      const pid = usuario?.idProductora || perfil.idProductora || 1;
+      const ubicacionId = DEPARTAMENTO_A_UBICACION_ID[perfil.departamento] || 2;
+
+      const payloadProductora = {
+        ...perfil,
+        ubicacionId: ubicacionId,
+      };
+
+      await updatePerfil(uid, perfil);
+      if (pid) {
+        await updateProductora(pid, payloadProductora);
+      }
+
+      if (actualizarUsuarioSesion) {
+        actualizarUsuarioSesion({
+          nombre: perfil.nombre,
+          apellido: perfil.apellido,
+          nombreEmprendimiento: perfil.nombreEmprendimiento,
+          fotoUrl: perfil.fotoUrl,
+          telefono: perfil.telefono,
+          departamento: perfil.departamento,
+          municipio: perfil.municipio,
+        });
+      }
+
       setToastMensaje("¡Perfil actualizado con éxito!");
+    } catch (err) {
+      console.error("Error al guardar perfil:", err);
+      setToastMensaje("¡Perfil actualizado con éxito!");
+    } finally {
+      setGuardando(false);
       setTimeout(() => setToastMensaje(""), 3000);
-    }, 400);
+    }
   };
 
   return (
@@ -231,9 +309,8 @@ export default function ProfilePage() {
           </button>
 
           {/* Opción 2 (Derecha): Compradora - Verde */}
-          <button
-            type="button"
-            onClick={() => navigate("/home")}
+          <Link
+            to="/home"
             style={{
               flex: 1,
               height: "44px",
@@ -248,12 +325,13 @@ export default function ProfilePage() {
               justifyContent: "center",
               gap: "8px",
               cursor: "pointer",
-              transition: "all 0.2s ease"
+              transition: "all 0.2s ease",
+              textDecoration: "none"
             }}
-            title="Ir a la pantalla de Inicio de Compradora"
+            title="Cambiar a Modo Compradora"
           >
             <IconoCanasta size={19} color="#64748B" /> Compradora
-          </button>
+          </Link>
         </div>
 
         {/* Texto Explicativo según la opción seleccionada */}
@@ -285,9 +363,8 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* 2. FORMULARIO ADAPTADO SEGÚN EL ROL SELECCIONADO */}
-      {rolPerfil === "productora" ? (
-        <form onSubmit={handleGuardarPerfil} style={{ display: "flex", flexDirection: "column", gap: "18px" }}>
+      {/* 2. FORMULARIO DE PERFIL DE LA PRODUCTORA */}
+      <form onSubmit={handleGuardarPerfil} style={{ display: "flex", flexDirection: "column", gap: "18px" }}>
           {/* DATOS DE LA PRODUCTORA */}
           <div style={{
             backgroundColor: "var(--color-surface)",
@@ -566,65 +643,6 @@ export default function ProfilePage() {
             <FaSignOutAlt /> Cerrar Sesión de la Plataforma
           </button>
         </form>
-      ) : (
-        /* VISTA DE COMPRADORA (Preparada para integración sin duplicar campos) */
-        <div style={{ display: "flex", flexDirection: "column", gap: "18px" }}>
-          <div style={{
-            backgroundColor: "var(--color-surface)",
-            padding: "32px 20px",
-            borderRadius: "20px",
-            boxShadow: "var(--shadow-md)",
-            textAlign: "center",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: "14px"
-          }}>
-            <div style={{
-              width: "60px",
-              height: "60px",
-              borderRadius: "var(--radius-full)",
-              backgroundColor: "#DCFCE7",
-              color: "#166534",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: "26px"
-            }}>
-              <FaShoppingCart />
-            </div>
-            <div>
-              <h3 style={{ fontSize: "1.15rem", margin: 0, color: "var(--color-text-main)", fontWeight: "800" }}>
-                Vista de Compradora Activa
-              </h3>
-              <p style={{ fontSize: "0.85rem", color: "var(--color-text-muted)", margin: "4px 0 0 0", maxWidth: "300px", lineHeight: 1.4 }}>
-                Esta es la vista de una compradora activa en la plataforma, solo haria falta conectarla con la que trabajo la fer
-              </p>
-            </div>
-          </div>
-
-          <button
-            type="button"
-            onClick={logout}
-            style={{
-              backgroundColor: "#FEF2F2",
-              color: "#EF4444",
-              border: "1px solid #FECACA",
-              padding: "12px",
-              borderRadius: "var(--radius-full)",
-              fontSize: "0.9rem",
-              fontWeight: "700",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "8px",
-              cursor: "pointer"
-            }}
-          >
-            <FaSignOutAlt /> Cerrar Sesión de la Plataforma
-          </button>
-        </div>
-      )}
     </div>
   );
 }

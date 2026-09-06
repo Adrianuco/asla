@@ -43,12 +43,14 @@ export default function RegisterUserPage() {
     navigate("/registro-productora", {
       state: {
         datosUsuario: {
+          idUsuario: usuarioRegistrado?.idUsuario || usuarioRegistrado?.usuarioId,
           nombre: usuarioRegistrado?.nombre || usuarioRegistrado?.name || "",
           apellido: usuarioRegistrado?.apellido || "",
           correo: usuarioRegistrado?.correo || usuarioRegistrado?.email || "",
           cedula: usuarioRegistrado?.cedula || "",
           telefono: usuarioRegistrado?.telefono || "",
-          genero: "Femenino"
+          genero: "Femenino",
+          fotoUrl: usuarioRegistrado?.fotoUrl || usuarioRegistrado?.imagenUrl || ""
         }
       }
     });

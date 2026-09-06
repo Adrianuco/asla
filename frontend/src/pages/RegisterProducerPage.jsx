@@ -9,10 +9,11 @@ import {
   FaMapMarkerAlt,
   FaEnvelope,
   FaIdCard,
-  FaPhoneAlt,
-  FaSeedling
+  FaSeedling,
+  FaPhoneAlt
 } from "react-icons/fa";
 import aslaLogo from "../assets/asla-logo.svg";
+import { createProductora } from "../services/productoraService";
 
 // Departamentos de Nicaragua según base de datos / ubicación
 const DEPARTAMENTOS_NICARAGUA = [
@@ -35,18 +36,35 @@ const DEPARTAMENTOS_NICARAGUA = [
   "Costa Caribe Sur (RACCS)"
 ];
 
+const DEPARTAMENTO_A_UBICACION_ID = {
+  "Matagalpa": 1,
+  "Carazo": 2,
+  "Rivas": 3,
+  "Granada": 6,
+  "Masaya": 8,
+};
+
 export default function RegisterProducerPage() {
   const location = useLocation();
   const navigate = useNavigate();
   const { iniciarSesionRegistro } = useAuth();
 
-  // Reutilizar los datos provenientes del Registro General (o valores por defecto limpios)
-  const datosPrevios = location.state?.datosUsuario || {
-    nombre: "Santos",
-    apellido: "Jarquín",
-    correo: "santos.jarquin@asla.ni",
-    cedula: "441-150875-0002K",
-    telefono: "+505 8823 4567",
+  const usuarioGuardado = (() => {
+    try {
+      return JSON.parse(localStorage.getItem("asla_usuario_comprador") || "null");
+    } catch {
+      return null;
+    }
+  })();
+
+  // Reutilizar los datos provenientes del Registro General
+  const datosPrevios = location.state?.datosUsuario || usuarioGuardado || {
+    idUsuario: null,
+    nombre: "",
+    apellido: "",
+    correo: "",
+    cedula: "",
+    telefono: "",
     genero: "Femenino"
   };
 
@@ -59,7 +77,7 @@ export default function RegisterProducerPage() {
 
     // 2. Datos específicos de Productora
     nombreEmprendimiento: "",
-    departamento: "Matagalpa",
+    departamento: "Carazo",
     descripcion: ""
   });
 
@@ -94,23 +112,53 @@ export default function RegisterProducerPage() {
       return;
     }
 
+    const uid = datosPrevios.idUsuario || usuarioGuardado?.idUsuario || usuarioGuardado?.usuarioId;
+    if (!uid) {
+      setErrores({ correo: "No se encontró sesión de usuario válida. Por favor regístrate nuevamente." });
+      return;
+    }
+
     setCargando(true);
-    setTimeout(() => {
-      setCargando(false);
-      setExito(true);
-      if (iniciarSesionRegistro) {
-        iniciarSesionRegistro({
-          nombre: datosPrevios.nombre,
-          apellido: datosPrevios.apellido,
-          nombreEmprendimiento: formData.nombreEmprendimiento,
-          correo: formData.correo,
-          cedula: formData.cedula,
-        });
-      }
-      setTimeout(() => {
-        navigate("/productos");
-      }, 1500);
-    }, 600);
+
+    const ubicId = DEPARTAMENTO_A_UBICACION_ID[formData.departamento] || 2; // Por defecto Carazo/Jinotepe
+    const fotoFinal = datosPrevios.fotoUrl || datosPrevios.imagenUrl || usuarioGuardado?.fotoUrl || usuarioGuardado?.imagenUrl || "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&auto=format&fit=crop&q=80";
+
+    const payload = {
+      usuarioId: Number(uid),
+      ubicacionId: ubicId,
+      nombreEmprendimiento: formData.nombreEmprendimiento.trim(),
+      descripcion: formData.descripcion?.trim() || `Finca y emprendimiento agroecológico de ${datosPrevios.nombre || "Productora"} en ${formData.departamento}.`,
+      imagenUrl: fotoFinal,
+    };
+
+    createProductora(payload)
+      .then((res) => {
+        setCargando(false);
+        setExito(true);
+        const nuevoProductoraId = res?.productoraId || res?.id;
+        if (iniciarSesionRegistro) {
+          iniciarSesionRegistro({
+            idUsuario: Number(uid),
+            idProductora: nuevoProductoraId,
+            nombre: datosPrevios.nombre || "Productora",
+            apellido: datosPrevios.apellido || "",
+            nombreEmprendimiento: formData.nombreEmprendimiento.trim(),
+            correo: formData.correo.trim(),
+            cedula: formData.cedula.trim(),
+            telefono: formData.telefono.trim(),
+            fotoUrl: fotoFinal,
+            esProductora: true,
+          });
+        }
+        setTimeout(() => {
+          navigate("/productos");
+        }, 1000);
+      })
+      .catch((err) => {
+        setCargando(false);
+        console.error("Error al crear productora:", err);
+        setErrores({ nombreEmprendimiento: "Error al registrar la productora. Verifica tus datos o intenta nuevamente." });
+      });
   };
 
   return (

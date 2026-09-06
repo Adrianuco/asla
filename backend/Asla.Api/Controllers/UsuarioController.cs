@@ -52,6 +52,28 @@ public class UsuarioController : ControllerBase
         return Ok(nuevoUsuario);
     }
 
+    [HttpPost("login")]
+    public async Task<ActionResult<PerfilDto>> Login([FromBody] LoginDto dto)
+    {
+        var perfil = await _service.LoginAsync(dto);
+        if (perfil == null)
+        {
+            return Unauthorized(new { mensaje = "Cédula/Correo o contraseña incorrectos. Verifica tus datos." });
+        }
+        return Ok(perfil);
+    }
+
+    [HttpPost("registro")]
+    public async Task<ActionResult<PerfilDto>> Registro([FromBody] RegistroUsuarioDto dto)
+    {
+        if (string.IsNullOrWhiteSpace(dto.Nombre) || string.IsNullOrWhiteSpace(dto.Correo))
+        {
+            return BadRequest(new { mensaje = "Nombre y correo son obligatorios." });
+        }
+        var perfil = await _service.RegistrarAsync(dto);
+        return CreatedAtAction(nameof(GetPerfilUsuario), new { id = perfil.UsuarioId }, perfil);
+    }
+
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteUsuario(int id)
     {

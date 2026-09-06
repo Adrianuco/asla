@@ -2,8 +2,8 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import React, { useState, useEffect } from 'react';
 import Header from '../components/Header';
 import Banner from '../components/Banner';
-import CarruselProductos, { INITIAL_PRODUCTS } from '../components/CarruselProductos';
-import Productoras, { PRODUCERS, ProductorasView } from '../components/Productoras';
+import CarruselProductos from '../components/CarruselProductos';
+import Productoras, { ProductorasView } from '../components/Productoras';
 import DetalleProducto from '../components/DetalleProducto';
 import PerfilProductora from '../components/PerfilProductora';
 import PerfilUsuario from '../components/PerfilUsuario';
@@ -13,12 +13,52 @@ import RegistroUsuario from '../components/RegistroUsuario';
 import Footer from '../components/Footer';
 import Menu from '../components/Menu';
 import { IconoUbicacion, IconoFavoritos, IconoRegresar } from '../iconos';
+import { getProductos } from '../services/productoService';
+import { getProductoras, getProductoraById } from '../services/productoraService';
+
+function mapearProductoParaHome(p) {
+  let cat = 'granos';
+  const cName = (p.categoriaNombre || '').toLowerCase();
+  if (cName.includes('fruta') || cName.includes('cítrico') || cName.includes('citrico')) {
+    cat = 'frutas';
+  } else if (cName.includes('artesan') || cName.includes('textil')) {
+    cat = 'artesanias';
+  } else if (cName.includes('hortaliza') || cName.includes('verdura')) {
+    cat = 'verduras';
+  } else if (cName.includes('grano') || cName.includes('semilla')) {
+    cat = 'granos';
+  } else if (cName.includes('lácteo') || cName.includes('lacteo')) {
+    cat = 'lacteos';
+  } else if (cName.includes('miel') || cName.includes('dulce')) {
+    cat = 'artesanias';
+  } else if (cName.includes('café') || cName.includes('cafe') || cName.includes('cacao')) {
+    cat = 'granos';
+  }
+
+  return {
+    id: p.idProducto || p.productoId || p.id,
+    title: p.nombre || p.title,
+    category: cat,
+    location: p.productoraUbicacion || p.location || 'Nicaragua',
+    price: Number(p.precio !== undefined ? p.precio : p.price) || 0,
+    allowsTrueque: Boolean(p.permiteTrueque !== undefined ? p.permiteTrueque : p.allowsTrueque),
+    producer: p.productoraNombre || p.producer || 'Productora Rural',
+    producerId: p.idProductora || p.productoraId || p.producerId || 1,
+    producerPhone: p.productoraTelefono || p.phone || '',
+    phone: p.productoraTelefono || p.phone || '',
+    image: p.imagenUrl || p.image || 'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=500&auto=format&fit=crop&q=80',
+    description: p.descripcion || p.description || '',
+    truequeInterest: p.permiteTrueque ? 'Intercambio solidario por cosechas o artesanías' : '',
+    unit: p.unidadMedidaNombre || p.unit || 'Libra',
+    inStock: 20
+  };
+}
 
 const CompradoraHomePage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   // Estado de navegación inferior: 'inicio' | 'productoras' | 'favoritos' | 'perfil'
-  const [activeTab, setActiveTab] = useState('inicio');
+  const [activeTab, setActiveTab] = useState(() => location.state?.tab || 'inicio');
 
   // Estado de autenticación / registro: null | 'register' | 'login'
   const [authScreen, setAuthScreen] = useState(null);
@@ -27,13 +67,50 @@ const CompradoraHomePage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('todos');
 
-  // Estado de favoritos separados para productos y productoras
-  const [favoriteProducts, setFavoriteProducts] = useState([1, 2]);
-  const [favoriteProducers, setFavoriteProducers] = useState([1]);
+  // Estado de productos y productoras conectados con la API
+  const [productosDisponibles, setProductosDisponibles] = useState([]);
+  const [productorasDisponibles, setProductorasDisponibles] = useState([]);
+
+  // Identificar usuario actual para aislar favoritos y carrito
+  const usuarioActual = (() => {
+    try {
+      return JSON.parse(localStorage.getItem("asla_usuario_comprador") || localStorage.getItem("asla_auth_productora") || "null");
+    } catch {
+      return null;
+    }
+  })();
+  const userStorageKey = usuarioActual?.idUsuario || usuarioActual?.usuarioId || 'invitado';
+
+  // Estado de favoritos separados para productos y productoras (Aislados por usuario, vacíos por defecto)
+  const [favoriteProducts, setFavoriteProducts] = useState(() => {
+    try {
+      const saved = localStorage.getItem(`asla_fav_products_${userStorageKey}`);
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  const [favoriteProducers, setFavoriteProducers] = useState(() => {
+    try {
+      const saved = localStorage.getItem(`asla_fav_producers_${userStorageKey}`);
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
   const [favTabFilter, setFavTabFilter] = useState('todos');
 
-  // Estado del carrito de compras
-  const [cart, setCart] = useState([]);
+  // Estado del carrito de compras (Aislado por usuario, vacío por defecto)
+  const [cart, setCart] = useState(() => {
+    try {
+      const saved = localStorage.getItem(`asla_cart_${userStorageKey}`);
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
   const [isCartOpen, setIsCartOpen] = useState(false);
 
   // Estado de vistas en pantalla completa
@@ -59,10 +136,59 @@ const CompradoraHomePage = () => {
         console.error(e);
       }
     }
+    if (location.state?.tab) {
+      setActiveTab(location.state.tab);
+    }
     if (location.state?.mensajeBienvenida) {
       showToast(location.state.mensajeBienvenida);
     }
   }, [location.state]);
+
+  useEffect(() => {
+    let montado = true;
+    getProductos({ soloActivos: true }).then((data) => {
+      if (montado && data?.length > 0) {
+        const adaptados = data.map(mapearProductoParaHome);
+        // Concatenar o anteponer productos del backend
+        setProductosDisponibles(adaptados);
+      }
+    });
+
+    getProductoras().then((prods) => {
+      if (montado && prods?.length > 0) {
+        setProductorasDisponibles(prods);
+      }
+    });
+
+    return () => {
+      montado = false;
+    };
+  }, []);
+
+  // Persistencia de favoritos y carrito aislados por usuario
+  useEffect(() => {
+    try {
+      localStorage.setItem(`asla_fav_products_${userStorageKey}`, JSON.stringify(favoriteProducts));
+    } catch (e) {
+      console.error(e);
+    }
+  }, [favoriteProducts, userStorageKey]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(`asla_fav_producers_${userStorageKey}`, JSON.stringify(favoriteProducers));
+    } catch (e) {
+      console.error(e);
+    }
+  }, [favoriteProducers, userStorageKey]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(`asla_cart_${userStorageKey}`, JSON.stringify(cart));
+    } catch (e) {
+      console.error(e);
+    }
+  }, [cart, userStorageKey]);
 
   // Manejo de Favoritos de Productos
   const handleToggleFavoriteProduct = (productId) => {
@@ -79,7 +205,7 @@ const CompradoraHomePage = () => {
 
   // Manejo de Favoritos / Seguir Productoras
   const handleToggleFavoriteProducer = (producerId) => {
-    const producerObj = PRODUCERS.find((p) => p.id === producerId);
+    const producerObj = productorasDisponibles.find((p) => p.id === producerId);
     const name = producerObj ? producerObj.name : 'la productora';
     setFavoriteProducers((prev) => {
       if (prev.includes(producerId)) {
@@ -90,6 +216,19 @@ const CompradoraHomePage = () => {
         return [...prev, producerId];
       }
     });
+  };
+
+  // Cargar detalles completos de la productora seleccionada
+  const handleSelectProducer = async (producer) => {
+    setSelectedProducer(producer);
+    try {
+      const full = await getProductoraById(producer.id);
+      if (full) {
+        setSelectedProducer(full);
+      }
+    } catch (err) {
+      console.error("Error al cargar productora completa:", err);
+    }
   };
 
   // Manejo de Carrito
@@ -137,7 +276,9 @@ const CompradoraHomePage = () => {
     const meetingPlace = formData.get('location') || truequeTargetProduct.location || 'Nicaragua';
     const message = formData.get('message') || '';
 
-    const phone = '50588991122'; // Teléfono WhatsApp de la red de productoras
+    const rawPhone = truequeTargetProduct.producerPhone || truequeTargetProduct.phone || '';
+    const digits = String(rawPhone).replace(/\D/g, '');
+    const phone = digits.length === 8 ? '505' + digits : (digits.length === 11 && digits.startsWith('505') ? digits : (digits || '50588991122'));
     const whatsappText = encodeURIComponent(
       `¡Hola Doña ${truequeTargetProduct.producer}! 🌾🤝\n` +
       `Te contacto a través de la aplicación *Asla* con una propuesta de *Trueque Solidario*:\n\n` +
@@ -196,6 +337,7 @@ const CompradoraHomePage = () => {
             /* Pantalla Completa de Carrito de Compras (Carpeta: /carrito) */
             <Carrito
               cart={cart}
+              producers={productorasDisponibles}
               onBack={() => setIsCartOpen(false)}
               onUpdateQuantity={handleUpdateCartQuantity}
               onRemoveItem={(id) => setCart((prev) => prev.filter((item) => item.id !== id))}
@@ -220,10 +362,10 @@ const CompradoraHomePage = () => {
               isFavorite={favoriteProducts.includes(selectedProduct.id)}
               onToggleFavorite={() => handleToggleFavoriteProduct(selectedProduct.id)}
               onViewProducer={(prodName) => {
-                const found = PRODUCERS.find((p) => p.name === prodName);
+                const found = productorasDisponibles.find((p) => p.name === prodName);
                 if (found) {
                   setSelectedProduct(null);
-                  setSelectedProducer(found);
+                  handleSelectProducer(found);
                 }
               }}
             />
@@ -247,7 +389,7 @@ const CompradoraHomePage = () => {
 
                   {/* Carrusel de Productos: Compra o intercambia */}
                   <CarruselProductos
-                    products={INITIAL_PRODUCTS}
+                    products={productosDisponibles}
                     searchQuery={searchQuery}
                     selectedCategory={selectedCategory}
                     favorites={favoriteProducts}
@@ -259,7 +401,8 @@ const CompradoraHomePage = () => {
 
                   {/* Componente Productoras: Productoras cerca de vos */}
                   <Productoras
-                    onSelectProducer={(prod) => setSelectedProducer(prod)}
+                    producers={productorasDisponibles}
+                    onSelectProducer={handleSelectProducer}
                     onSeeAll={() => setActiveTab('productoras')}
                   />
 
@@ -270,7 +413,8 @@ const CompradoraHomePage = () => {
 
               {activeTab === 'productoras' && (
                 <ProductorasView
-                  onSelectProducer={(prod) => setSelectedProducer(prod)}
+                  producers={productorasDisponibles}
+                  onSelectProducer={handleSelectProducer}
                   favorites={favoriteProducers}
                   onToggleFavorite={handleToggleFavoriteProducer}
                 />
@@ -354,14 +498,14 @@ const CompradoraHomePage = () => {
                       {(favTabFilter === 'todos' || favTabFilter === 'productoras') && favoriteProducers.length > 0 && (
                         <div className="fav-section-block">
                           <h3 className="fav-section-title">
-                             Productoras que sigues ({favoriteProducers.length})
+                            Productoras que sigues ({favoriteProducers.length})
                           </h3>
                           <div className="productoras-cards-feed">
-                            {PRODUCERS.filter((p) => favoriteProducers.includes(p.id)).map((producer) => (
+                            {productorasDisponibles.filter((p) => favoriteProducers.includes(p.id)).map((producer) => (
                               <div
                                 key={producer.id}
                                 className="productora-feed-card"
-                                onClick={() => setSelectedProducer(producer)}
+                                onClick={() => handleSelectProducer(producer)}
                               >
                                 {/* Cabecera de la Tarjeta */}
                                 <div className="feed-card-header">
@@ -438,7 +582,7 @@ const CompradoraHomePage = () => {
                             Productos guardados ({favoriteProducts.length})
                           </h3>
                           <div className="favorites-list">
-                            {INITIAL_PRODUCTS.filter((p) => favoriteProducts.includes(p.id)).map((product) => (
+                            {productosDisponibles.filter((p) => favoriteProducts.includes(p.id)).map((product) => (
                               <div
                                 key={product.id}
                                 className="favorite-item-card"
