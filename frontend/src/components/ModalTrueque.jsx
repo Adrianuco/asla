@@ -12,7 +12,10 @@ const ModalTrueque = ({ product, onClose, onSent }) => {
     e.preventDefault();
     if (!offer.trim()) return;
 
-    const phone = '505.....'; // Teléfono WhatsApp de la red de productoras
+    const rawPhone = product.producerPhone || product.phone || '';
+    const digits = String(rawPhone).replace(/\D/g, '');
+    const phone = digits.length === 8 ? '505' + digits : (digits.length === 11 && digits.startsWith('505') ? digits : (digits || '50588991122'));
+
     const whatsappText = encodeURIComponent(
       `¡Hola Doña ${product.producer}! 🌾🤝\n` +
       `Te contacto desde la aplicación *Asla* con una propuesta de *Trueque Solidario*:\n\n` +

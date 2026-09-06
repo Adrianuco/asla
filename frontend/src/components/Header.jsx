@@ -1,3 +1,5 @@
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import { IconoCarrito, IconoBuscar } from '../iconos';
 
 const CATEGORIES = [
@@ -18,6 +20,9 @@ const Header = ({
   cartCount = 0,
   onOpenCart = () => {},
 }) => {
+  const navigate = useNavigate();
+  const { estaAutenticado, usuario } = useAuth();
+
   return (
     <div className="header-wrapper">
       <header className="asla-header-green">
@@ -32,14 +37,40 @@ const Header = ({
             <span className="logo-text">Asla</span>
           </div>
 
-          <button 
-            className="cart-button" 
-            onClick={onOpenCart}
-            aria-label="Carrito de compras"
-          >
-            <IconoCarrito className="cart-icon" size={30} color="#FFFFFF" />
-            {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            {estaAutenticado && (usuario?.esProductora || usuario?.idProductora) && (
+              <button
+                type="button"
+                onClick={() => navigate('/productos')}
+                style={{
+                  backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                  color: '#ffffff',
+                  border: '1.5px solid rgba(255, 255, 255, 0.4)',
+                  padding: '5px 12px',
+                  borderRadius: 'var(--radius-full)',
+                  fontSize: '0.8rem',
+                  fontWeight: '700',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  backdropFilter: 'blur(4px)'
+                }}
+                title="Volver a mi panel de Productora"
+              >
+                🌱 Modo Productora
+              </button>
+            )}
+
+            <button 
+              className="cart-button" 
+              onClick={onOpenCart}
+              aria-label="Carrito de compras"
+            >
+              <IconoCarrito className="cart-icon" size={30} color="#FFFFFF" />
+              {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
+            </button>
+          </div>
         </div>
 
         <div className="search-bar-wrapper">

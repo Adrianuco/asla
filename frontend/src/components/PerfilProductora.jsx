@@ -16,61 +16,16 @@ const PerfilProductora = ({
   if (!producer) return null;
 
   // Productos de la productora
-  const products = producer.productsList && producer.productsList.length > 0
-    ? producer.productsList
-    : [
-        {
-          id: 101,
-          title: 'Mangos de rosa',
-          price: 25,
-          unit: 'Docena',
-          location: producer.location,
-          producer: producer.name,
-          image: 'https://images.unsplash.com/photo-1553279768-865429fa0078?auto=format&fit=crop&w=500&q=80',
-          allowsTrueque: true,
-          description: 'Mangos dulces madurados naturalmente al sol en Carazo.'
-        },
-        {
-          id: 102,
-          title: 'Aguacates',
-          price: 25,
-          unit: 'Unidad',
-          location: producer.location,
-          producer: producer.name,
-          image: 'https://images.unsplash.com/photo-1523049673857-eb18f1d7b578?auto=format&fit=crop&w=500&q=80',
-          allowsTrueque: true,
-          description: 'Aguacates mantequilla frescos, recién cosechados.'
-        },
-        {
-          id: 103,
-          title: 'Piñas dulces',
-          price: 35,
-          unit: 'Unidad',
-          location: producer.location,
-          producer: producer.name,
-          image: 'https://images.unsplash.com/photo-1550258987-190a2d41a8ba?auto=format&fit=crop&w=500&q=80',
-          allowsTrueque: true,
-          description: 'Piña jugosa y dulce cosechada de forma 100% agroecológica.'
-        },
-        {
-          id: 104,
-          title: 'Bananos de seda',
-          price: 20,
-          unit: 'Docena',
-          location: producer.location,
-          producer: producer.name,
-          image: 'https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?auto=format&fit=crop&w=500&q=80',
-          allowsTrueque: true,
-          description: 'Bananos dulces madurados en racimo.'
-        }
-      ];
+  const products = Array.isArray(producer.productsList) ? producer.productsList : [];
 
   const firstName = producer.name.split(' ')[0];
 
   const handleWhatsApp = () => {
-    const phone = producer.phone || '50588888888';
+    const raw = producer.phone || '50588888888';
+    const digits = String(raw).replace(/\D/g, '');
+    const phone = digits.length === 8 ? '505' + digits : (digits.length === 11 && digits.startsWith('505') ? digits : (digits || '50588888888'));
     const message = encodeURIComponent(`Hola ${producer.name}, te contacto desde la app Asla. Me interesan tus productos.`);
-    window.open(`https://wa.me/${phone.replace(/[^0-9]/g, '')}?text=${message}`, '_blank');
+    window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
   };
 
   return (
@@ -171,40 +126,47 @@ const PerfilProductora = ({
               <span className="products-dropdown-arrow">▼</span>
             </div>
             <div className="producer-products-available-badge">
-              <span>{producer.productsCount || products.length || 6} Disponibles</span>
+              <span>{producer.productsCount || products.length} Disponibles</span>
               <span className="green-status-dot">●</span>
             </div>
           </div>
 
-          <div className="producer-products-2col-grid">
-            {products.map((prod) => (
-              <div
-                key={prod.id}
-                className="producer-product-grid-card"
-                onClick={() => onSelectProduct(prod)}
-              >
-                <div className="producer-product-img-box">
-                  <img
-                    src={prod.image}
-                    alt={prod.title}
-                    className="producer-product-img"
-                    loading="lazy"
-                  />
-                  {prod.allowsTrueque && (
-                    <span className="producer-trueque-chip">Trueque</span>
-                  )}
-                </div>
+          {products.length === 0 ? (
+            <div style={{ textAlign: "center", padding: "28px 16px", color: "#64748B", fontSize: "0.9rem" }}>
+              <span style={{ fontSize: "1.8rem", display: "block", marginBottom: "8px" }}>🌱</span>
+              Esta productora no tiene cosechas publicadas en este momento.
+            </div>
+          ) : (
+            <div className="producer-products-2col-grid">
+              {products.map((prod) => (
+                <div
+                  key={prod.id}
+                  className="producer-product-grid-card"
+                  onClick={() => onSelectProduct(prod)}
+                >
+                  <div className="producer-product-img-box">
+                    <img
+                      src={prod.image || prod.imagenUrl}
+                      alt={prod.title || prod.nombre}
+                      className="producer-product-img"
+                      loading="lazy"
+                    />
+                    {prod.allowsTrueque && (
+                      <span className="producer-trueque-chip">Trueque</span>
+                    )}
+                  </div>
 
-                <div className="producer-product-meta">
-                  <h4 className="producer-product-name">{prod.title}</h4>
-                  <div className="producer-product-price-row">
-                    <span className="prod-price-green">C${prod.price}</span>
-                    <span className="prod-unit-gray">/{prod.unit || 'Unidad'}</span>
+                  <div className="producer-product-meta">
+                    <h4 className="producer-product-name">{prod.title || prod.nombre}</h4>
+                    <div className="producer-product-price-row">
+                      <span className="prod-price-green">C${prod.price ?? prod.precio ?? 0}</span>
+                      <span className="prod-unit-gray">/{prod.unit || prod.unidadMedidaNombre || 'Unidad'}</span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>

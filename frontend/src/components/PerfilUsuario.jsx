@@ -1,6 +1,7 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { getPerfil, updatePerfil } from '../services/usuarioService';
 import { FaCamera, FaStore, FaUserCheck } from 'react-icons/fa';
 import aslaLogo from '../assets/asla-logo.svg';
 import {
@@ -17,37 +18,75 @@ import {
 
 const PerfilUsuario = ({ onModalToggle = () => {}, onLogout = () => {} }) => {
   const navigate = useNavigate();
-  const { estaAutenticado, logout } = useAuth();
+  const { usuario, estaAutenticado, logout } = useAuth();
   // Estado del rol: 'compradora' | 'productora'
   const [activeRole, setActiveRole] = useState('compradora');
   const [mostrarModalProductora, setMostrarModalProductora] = useState(false);
 
   const [userData, setUserData] = useState(() => {
+    if (usuario) {
+      const nombreCompleto = usuario.nombreCompleto || `${usuario.nombre || ''} ${usuario.apellido || ''}`.trim() || usuario.name || 'Usuaria';
+      return {
+        idUsuario: usuario.idUsuario,
+        name: nombreCompleto,
+        phone: usuario.telefono || '',
+        email: usuario.correo || usuario.email || '',
+        location: usuario.ubicacion || 'Nicaragua',
+        gender: usuario.genero || usuario.gender || 'Femenino',
+        avatar: usuario.fotoUrl || usuario.imagenUrl || null,
+        cedula: usuario.cedula || '',
+      };
+    }
     try {
       const guardado = localStorage.getItem("asla_usuario_comprador");
       if (guardado) {
         const u = JSON.parse(guardado);
         return {
-          name: u.name || `${u.nombre || ''} ${u.apellido || ''}`.trim() || 'Ana María Lopez',
-          phone: u.telefono || u.phone || '+505 8899-1122',
-          email: u.correo || u.email || 'anamaria.lopez@gmail.com',
-          location: u.location || 'Jinotepe, Nicaragua',
+          idUsuario: u.idUsuario,
+          name: u.name || `${u.nombre || ''} ${u.apellido || ''}`.trim() || 'Usuaria',
+          phone: u.telefono || u.phone || '',
+          email: u.correo || u.email || '',
+          location: u.location || 'Nicaragua',
           gender: u.gender || u.genero || 'Femenino',
-          avatar: u.avatar || null,
+          avatar: u.avatar || u.fotoUrl || null,
+          cedula: u.cedula || '',
         };
       }
     } catch (e) {
       console.error(e);
     }
     return {
-      name: 'Ana María Lopez',
-      phone: '+505 8899-1122',
-      email: 'anamaria.lopez@gmail.com',
-      location: 'Jinotepe, Nicaragua',
+      idUsuario: null,
+      name: 'Usuaria ASLA',
+      phone: '',
+      email: '',
+      location: 'Nicaragua',
       gender: 'Femenino',
       avatar: null,
+      cedula: '',
     };
   });
+
+  useEffect(() => {
+    const uid = usuario?.idUsuario || userData.idUsuario;
+    if (uid) {
+      getPerfil(uid).then((p) => {
+        if (p) {
+          setUserData((prev) => ({
+            ...prev,
+            idUsuario: p.usuarioId || uid,
+            name: p.nombreCompleto || prev.name,
+            phone: p.telefono || prev.phone,
+            email: p.correo || prev.email,
+            location: p.ubicacion || prev.location,
+            gender: p.genero || prev.gender,
+            avatar: p.imagenUrl || prev.avatar,
+            cedula: p.cedula || prev.cedula,
+          }));
+        }
+      });
+    }
+  }, [usuario?.idUsuario]);
 
   const esHombre =
     userData?.gender?.toLowerCase() === 'masculino' ||
@@ -70,6 +109,19 @@ const PerfilUsuario = ({ onModalToggle = () => {}, onLogout = () => {} }) => {
           }
           return updated;
         });
+
+        const uid = usuario?.idUsuario || userData.idUsuario;
+        if (uid) {
+          const partes = (userData.name || '').split(' ');
+          updatePerfil(uid, {
+            nombre: partes[0] || 'Usuaria',
+            apellido: partes.slice(1).join(' ') || '',
+            telefono: userData.phone || '',
+            genero: userData.gender || 'Femenino',
+            imagenUrl: nuevaFoto
+          }).catch(console.error);
+        }
+
         showToast('¡Foto de perfil actualizada!');
       };
       reader.readAsDataURL(file);
@@ -158,11 +210,32 @@ const PerfilUsuario = ({ onModalToggle = () => {}, onLogout = () => {} }) => {
     e.preventDefault();
     if (!tempName.trim()) return;
 
-    setUserData((prev) => ({
-      ...prev,
-      name: tempName.trim(),
-      phone: tempPhone.trim(),
-    }));
+    setUserData((prev) => {
+      const updated = {
+        ...prev,
+        name: tempName.trim(),
+        phone: tempPhone.trim(),
+      };
+      try {
+        localStorage.setItem("asla_usuario_comprador", JSON.stringify(updated));
+      } catch (err) {
+        console.error(err);
+      }
+      return updated;
+    });
+
+    const uid = usuario?.idUsuario || userData.idUsuario;
+    if (uid) {
+      const partes = tempName.trim().split(' ');
+      updatePerfil(uid, {
+        nombre: partes[0] || 'Usuaria',
+        apellido: partes.slice(1).join(' ') || '',
+        telefono: tempPhone.trim(),
+        genero: userData.gender || 'Femenino',
+        imagenUrl: userData.avatar || undefined
+      }).catch(console.error);
+    }
+
     closeModal();
     showToast('¡Nombre y teléfono actualizados!');
   };
@@ -308,7 +381,7 @@ const PerfilUsuario = ({ onModalToggle = () => {}, onLogout = () => {} }) => {
                 className={`role-toggle-btn role-productora ${activeRole === 'productora' ? 'active-pink' : ''}`}
                 onClick={() => {
                   if (estaAutenticado) {
-                    navigate('/productos');
+                    navigate('/perfil');
                   } else {
                     handleAbrirModalProductora();
                   }

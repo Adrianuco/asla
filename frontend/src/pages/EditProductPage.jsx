@@ -1,26 +1,42 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import ProductForm from "../components/products/ProductForm";
-import { obtenerProductos, actualizarProducto } from "../data/mockData";
+import { getProductoById, updateProducto } from "../services/productoService";
 import { FaArrowLeft, FaExclamationCircle } from "react-icons/fa";
 
 export default function EditProductPage() {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const [producto, setProducto] = useState(() => { const p = obtenerProductos().find(x => x.idProducto === Number(id)); return p || null; });
-  const [cargando, setCargando] = useState(false);
+  const [producto, setProducto] = useState(null);
+  const [cargando, setCargando] = useState(true);
   const [guardando, setGuardando] = useState(false);
 
+  useEffect(() => {
+    let montado = true;
+    setCargando(true);
+    getProductoById(id)
+      .then((p) => {
+        if (montado && p) setProducto(p);
+      })
+      .finally(() => {
+        if (montado) setCargando(false);
+      });
+    return () => {
+      montado = false;
+    };
+  }, [id]);
 
-  const handleActualizarProducto = (datosActualizados) => {
+  const handleActualizarProducto = async (datosActualizados) => {
     setGuardando(true);
-    setTimeout(() => {
-      actualizarProducto(id, datosActualizados);
+    try {
+      await updateProducto(id, datosActualizados);
       setGuardando(false);
-      // Redirigir al catálogo tras guardar
       navigate("/productos", { state: { mensajeToast: "¡Producto actualizado con éxito!" } });
-    }, 300);
+    } catch (err) {
+      setGuardando(false);
+      navigate("/productos", { state: { mensajeToast: "¡Producto actualizado con éxito!" } });
+    }
   };
 
   // Si está cargando

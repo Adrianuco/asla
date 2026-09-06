@@ -1,21 +1,34 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import ProductForm from "../components/products/ProductForm";
-import { crearProducto } from "../data/mockData";
+import { createProducto } from "../services/productoService";
+import { useAuth } from "../context/AuthContext";
 import { FaArrowLeft } from "react-icons/fa";
 
 export default function PublishProductPage() {
   const navigate = useNavigate();
+  const { usuario } = useAuth();
   const [cargando, setCargando] = useState(false);
 
-  const handleGuardarProducto = (datosNuevoProducto) => {
+  const handleGuardarProducto = async (datosNuevoProducto) => {
+    const idProd = usuario?.idProductora;
+    if (!idProd) {
+      alert("Debes tener un perfil de productora activo para publicar productos.");
+      return;
+    }
     setCargando(true);
-    setTimeout(() => {
-      crearProducto(datosNuevoProducto);
+    try {
+      await createProducto({
+        ...datosNuevoProducto,
+        productoraId: idProd,
+      });
       setCargando(false);
-      // Redirigir al catálogo para ver el producto recién publicado
       navigate("/productos", { state: { mensajeToast: "¡Producto publicado con éxito!" } });
-    }, 300);
+    } catch (err) {
+      setCargando(false);
+      console.error("Error al publicar producto:", err);
+      navigate("/productos", { state: { mensajeToast: "¡Error al publicar producto!" } });
+    }
   };
 
   return (

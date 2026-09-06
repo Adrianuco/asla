@@ -3,20 +3,43 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import ProductCard from "../components/products/ProductCard";
 import ConfirmModal from "../components/common/ConfirmModal";
 import { useAuth } from "../context/AuthContext";
-import { obtenerProductos, cambiarEstadoProducto, eliminarProducto } from "../data/mockData";
+import { getProductos, deleteProducto } from "../services/productoService";
 import { FaSearch, FaTimes, FaPlus, FaBoxes, FaCheck } from "react-icons/fa";
 
 export default function CatalogPage() {
   const { usuario } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
-  const [productos, setProductos] = useState(() => obtenerProductos());
-  const [cargando] = useState(false);
+  const [productos, setProductos] = useState([]);
+  const [cargando, setCargando] = useState(false);
 
   const [busqueda, setBusqueda] = useState("");
   const [filtroEstado, setFiltroEstado] = useState("todos");
   const [productoAEliminar, setProductoAEliminar] = useState(null);
   const [mensajeToast, setMensajeToast] = useState("");
+
+  const cargarProductos = async () => {
+    const idProd = usuario?.idProductora;
+    if (!idProd) {
+      setProductos([]);
+      return;
+    }
+    setCargando(true);
+    try {
+      const data = await getProductos({ productoraId: idProd });
+      if (data) {
+        setProductos(data);
+      }
+    } catch (e) {
+      console.warn("Error cargando productos de API:", e);
+    } finally {
+      setCargando(false);
+    }
+  };
+
+  useEffect(() => {
+    cargarProductos();
+  }, [usuario?.idProductora]);
 
   const mostrarToast = (mensaje) => {
     setMensajeToast(mensaje);
@@ -32,10 +55,11 @@ export default function CatalogPage() {
     }
   }, [location, navigate]);
 
-  const handleConfirmarEliminar = () => {
+  const handleConfirmarEliminar = async () => {
     if (!productoAEliminar) return;
-    const listaActualizada = eliminarProducto(productoAEliminar.idProducto);
-    setProductos(listaActualizada);
+    const id = productoAEliminar.idProducto;
+    await deleteProducto(id);
+    setProductos((prev) => prev.filter((p) => p.idProducto !== id));
     mostrarToast(`"${productoAEliminar.nombre}" eliminado correctamente.`);
     setProductoAEliminar(null);
   };

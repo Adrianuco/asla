@@ -1,5 +1,5 @@
 import { createContext, useContext, useState } from "react";
-import { obtenerPerfil } from "../data/mockData";
+import { login as loginService } from "../services/usuarioService";
 
 const AuthContext = createContext();
 
@@ -20,54 +20,50 @@ export function AuthProvider({ children }) {
 
   const [cargando, setCargando] = useState(false);
 
-  const login = (identificador, contrasena) => {
+  const login = async (identificador, contrasena) => {
     setCargando(true);
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        const perfilActual = obtenerPerfil();
-        const identLimpio = identificador.trim().toLowerCase();
-
-        const coincideCorreo = perfilActual.correo.toLowerCase() === identLimpio;
-        const coincideCedula = perfilActual.cedula.toLowerCase() === identLimpio;
-
-        if ((coincideCorreo || coincideCedula || identLimpio === "productora" || identLimpio.includes("santos")) && contrasena) {
-          const sesion = {
-            idUsuario: perfilActual.idUsuario,
-            idProductora: perfilActual.idProductora,
-            nombre: perfilActual.nombre,
-            apellido: perfilActual.apellido,
-            nombreEmprendimiento: perfilActual.nombreEmprendimiento,
-            correo: perfilActual.correo,
-            cedula: perfilActual.cedula,
-            fotoUrl: perfilActual.fotoUrl
-          };
-          setUsuario(sesion);
-          localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(sesion));
-          setCargando(false);
-          resolve({ exito: true, usuario: sesion });
-        } else {
-          setCargando(false);
-          reject(new Error("Cédula/Correo o contraseña incorrectos. Verifica tus datos."));
-        }
-      }, 400);
-    });
+    try {
+      const sesion = await loginService(identificador, contrasena);
+      setUsuario(sesion);
+      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(sesion));
+      setCargando(false);
+      return { exito: true, usuario: sesion };
+    } catch (err) {
+      setCargando(false);
+      throw err;
+    }
   };
 
   const iniciarSesionRegistro = (datos) => {
-    const perfilActual = obtenerPerfil();
     const sesion = {
-      idUsuario: perfilActual.idUsuario,
-      idProductora: perfilActual.idProductora,
-      nombre: datos?.nombre || perfilActual.nombre,
-      apellido: datos?.apellido || perfilActual.apellido,
-      nombreEmprendimiento: datos?.nombreEmprendimiento || perfilActual.nombreEmprendimiento,
-      correo: datos?.correo || perfilActual.correo,
-      cedula: datos?.cedula || perfilActual.cedula,
-      fotoUrl: perfilActual.fotoUrl
+      idUsuario: datos?.idUsuario || datos?.usuarioId || 1,
+      idProductora: datos?.idProductora || datos?.productoraId || null,
+      nombre: datos?.nombre || "Usuario",
+      apellido: datos?.apellido || "",
+      nombreEmprendimiento: datos?.nombreEmprendimiento || "",
+      correo: datos?.correo || "",
+      cedula: datos?.cedula || "",
+      fotoUrl: datos?.fotoUrl || datos?.imagenUrl || "",
+      esProductora: datos?.esProductora !== undefined ? datos.esProductora : true,
     };
     setUsuario(sesion);
     localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(sesion));
     return sesion;
+  };
+
+  const actualizarUsuarioSesion = (datosNuevos) => {
+    setUsuario((prev) => {
+      const actualizado = {
+        ...prev,
+        ...datosNuevos,
+      };
+      try {
+        localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(actualizado));
+      } catch (err) {
+        console.error(err);
+      }
+      return actualizado;
+    });
   };
 
   const logout = () => {
@@ -83,6 +79,7 @@ export function AuthProvider({ children }) {
         cargando,
         login,
         iniciarSesionRegistro,
+        actualizarUsuarioSesion,
         logout
       }}
     >
