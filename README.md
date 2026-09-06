@@ -153,13 +153,13 @@ El proyecto sigue una arquitectura cliente-servidor compuesta por un frontend, u
 
 ```bash
 git clone https://github.com/Adrianuco/asla.git
+cd asla
 ```
 
 ### Backend
 
 ```bash
-cd backend
-dotnet restore
+cd backend/Asla.Api
 dotnet run
 ```
 
@@ -183,8 +183,6 @@ app/
 ├── backend/
 │
 ├── database/
-│
-├── docs/
 │
 └── README.md
 ```
