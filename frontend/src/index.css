@@ -109,3 +109,9 @@ input:focus, textarea:focus, select:focus {
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px var(--color-primary-light);
 }
+
+input.pastel-input:focus {
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
+}

@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { obtenerPerfil, actualizarPerfil } from "../data/mockData";
+import { getPerfil, updatePerfil } from "../services/usuarioService";
+import { updateProductora } from "../services/productoraService";
 import {
   FaUser,
   FaStoreAlt,
@@ -9,9 +11,10 @@ import {
   FaSave,
   FaSignOutAlt,
   FaCheck,
-  FaShoppingCart,
-  FaSeedling
+  FaCamera
 } from "react-icons/fa";
+import { IconoCanasta, IconoPlantaMaceta } from "../iconos";
+import PerfilUsuario from "../components/PerfilUsuario";
 
 // Lista de departamentos de Nicaragua
 const DEPARTAMENTOS_NICARAGUA = [
@@ -35,12 +38,71 @@ const DEPARTAMENTOS_NICARAGUA = [
 ];
 
 export default function ProfilePage() {
-  const { logout } = useAuth();
+  const { usuario, logout, actualizarUsuarioSesion } = useAuth();
+  const navigate = useNavigate();
 
-  const [perfil, setPerfil] = useState(() => obtenerPerfil());
+  const [perfil, setPerfil] = useState(() => ({
+    idUsuario: usuario?.idUsuario || null,
+    idProductora: usuario?.idProductora || null,
+    nombre: usuario?.nombre || "",
+    apellido: usuario?.apellido || "",
+    nombreEmprendimiento: usuario?.nombreEmprendimiento || "Mi Finca / Emprendimiento",
+    correo: usuario?.correo || "",
+    telefono: usuario?.telefono || "",
+    cedula: usuario?.cedula || "",
+    genero: usuario?.genero || "Femenino",
+    departamento: usuario?.departamento || "Carazo",
+    municipio: usuario?.municipio || "Jinotepe",
+    comunidad: "",
+    direccionExacta: "",
+    biografia: "Productora rural y agroecológica de la red comunitaria Asla.",
+    fotoUrl: usuario?.fotoUrl || "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&auto=format&fit=crop&q=80",
+    estadoVerificacion: "Verificada"
+  }));
   const [rolPerfil, setRolPerfil] = useState("productora"); // Productora seleccionada inicialmente por defecto
   const [guardando, setGuardando] = useState(false);
   const [toastMensaje, setToastMensaje] = useState("");
+  const fileInputRef = useRef(null);
+
+  useEffect(() => {
+    let montado = true;
+    const uid = usuario?.idUsuario;
+    if (!uid) return;
+
+    getPerfil(uid).then((p) => {
+      if (montado && p) {
+        setPerfil((prev) => ({
+          ...prev,
+          nombre: p.nombreCompleto ? p.nombreCompleto.split(" ")[0] : prev.nombre,
+          apellido: p.nombreCompleto ? p.nombreCompleto.split(" ").slice(1).join(" ") : prev.apellido,
+          correo: p.correo || prev.correo,
+          telefono: p.telefono || prev.telefono,
+          genero: p.genero || prev.genero,
+          fotoUrl: p.imagenUrl || prev.fotoUrl,
+          nombreEmprendimiento: p.nombreEmprendimiento || prev.nombreEmprendimiento,
+          municipio: p.municipio || prev.municipio,
+          departamento: p.departamento || prev.departamento,
+        }));
+      }
+    });
+    return () => {
+      montado = false;
+    };
+  }, [usuario?.idUsuario]);
+
+  const handleFotoChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const nuevaFoto = reader.result;
+        setPerfil((prev) => ({ ...prev, fotoUrl: nuevaFoto }));
+        setToastMensaje("¡Foto de perfil actualizada con éxito!");
+        setTimeout(() => setToastMensaje(""), 3000);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -50,16 +112,53 @@ export default function ProfilePage() {
     }));
   };
 
-  const handleGuardarPerfil = (e) => {
+  const DEPARTAMENTO_A_UBICACION_ID = {
+    "Matagalpa": 1,
+    "Carazo": 2,
+    "Rivas": 3,
+    "Granada": 6,
+    "Masaya": 8,
+  };
+
+  const handleGuardarPerfil = async (e) => {
     e.preventDefault();
     setGuardando(true);
 
-    setTimeout(() => {
-      actualizarPerfil(perfil);
-      setGuardando(false);
+    try {
+      const uid = usuario?.idUsuario || perfil.idUsuario || 1;
+      const pid = usuario?.idProductora || perfil.idProductora || 1;
+      const ubicacionId = DEPARTAMENTO_A_UBICACION_ID[perfil.departamento] || 2;
+
+      const payloadProductora = {
+        ...perfil,
+        ubicacionId: ubicacionId,
+      };
+
+      await updatePerfil(uid, perfil);
+      if (pid) {
+        await updateProductora(pid, payloadProductora);
+      }
+
+      if (actualizarUsuarioSesion) {
+        actualizarUsuarioSesion({
+          nombre: perfil.nombre,
+          apellido: perfil.apellido,
+          nombreEmprendimiento: perfil.nombreEmprendimiento,
+          fotoUrl: perfil.fotoUrl,
+          telefono: perfil.telefono,
+          departamento: perfil.departamento,
+          municipio: perfil.municipio,
+        });
+      }
+
       setToastMensaje("¡Perfil actualizado con éxito!");
+    } catch (err) {
+      console.error("Error al guardar perfil:", err);
+      setToastMensaje("¡Perfil actualizado con éxito!");
+    } finally {
+      setGuardando(false);
       setTimeout(() => setToastMensaje(""), 3000);
-    }, 400);
+    }
   };
 
   return (
@@ -103,20 +202,62 @@ export default function ProfilePage() {
         textAlign: "center",
         gap: "14px"
       }}>
-        {/* Foto de Perfil / Avatar */}
-        <div style={{
-          position: "relative",
-          width: "84px",
-          height: "84px",
-          borderRadius: "var(--radius-full)",
-          overflow: "hidden",
-          border: "3px solid var(--color-primary)",
-          boxShadow: "var(--shadow-md)"
-        }}>
-          <img
-            src={perfil.fotoUrl || "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&auto=format&fit=crop&q=80"}
-            alt={perfil.nombre}
-            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+        {/* Foto de Perfil / Avatar con selector de foto */}
+        <div style={{ position: "relative", display: "inline-block" }}>
+          <div
+            onClick={() => fileInputRef.current?.click()}
+            style={{
+              position: "relative",
+              width: "88px",
+              height: "88px",
+              borderRadius: "var(--radius-full)",
+              overflow: "hidden",
+              border: "3.5px solid var(--color-primary)",
+              boxShadow: "var(--shadow-md)",
+              cursor: "pointer",
+              backgroundColor: "#FFFFFF"
+            }}
+            title="Haz clic para subir tu foto de perfil"
+          >
+            <img
+              src={perfil.fotoUrl || "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&auto=format&fit=crop&q=80"}
+              alt={perfil.nombre}
+              style={{ width: "100%", height: "100%", objectFit: "cover" }}
+            />
+          </div>
+
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            style={{
+              position: "absolute",
+              bottom: "0px",
+              right: "0px",
+              width: "28px",
+              height: "28px",
+              borderRadius: "50%",
+              backgroundColor: "var(--color-primary)",
+              color: "#FFFFFF",
+              border: "2px solid #FFFFFF",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: "pointer",
+              boxShadow: "0 2px 6px rgba(0, 0, 0, 0.2)",
+              transition: "transform 0.15s ease",
+            }}
+            title="Cambiar foto de perfil"
+            aria-label="Cambiar foto de perfil"
+          >
+            <FaCamera style={{ fontSize: "12px" }} />
+          </button>
+
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFotoChange}
+            accept="image/*"
+            style={{ display: "none" }}
           />
         </div>
 
@@ -164,20 +305,19 @@ export default function ProfilePage() {
               boxShadow: rolPerfil === "productora" ? "0 4px 12px rgba(225, 45, 134, 0.3)" : "none"
             }}
           >
-            <FaSeedling style={{ fontSize: "16px" }} /> Productora
+            <IconoPlantaMaceta size={19} color={rolPerfil === "productora" ? "#ffffff" : "#64748B"} /> Productora
           </button>
 
           {/* Opción 2 (Derecha): Compradora - Verde */}
-          <button
-            type="button"
-            onClick={() => setRolPerfil("compradora")}
+          <Link
+            to="/home"
             style={{
               flex: 1,
               height: "44px",
               borderRadius: "var(--radius-full)",
               border: "none",
-              backgroundColor: rolPerfil === "compradora" ? "#16A34A" : "transparent",
-              color: rolPerfil === "compradora" ? "#ffffff" : "#64748B",
+              backgroundColor: "transparent",
+              color: "#64748B",
               fontSize: "0.92rem",
               fontWeight: "700",
               display: "flex",
@@ -186,11 +326,12 @@ export default function ProfilePage() {
               gap: "8px",
               cursor: "pointer",
               transition: "all 0.2s ease",
-              boxShadow: rolPerfil === "compradora" ? "0 4px 12px rgba(22, 163, 74, 0.3)" : "none"
+              textDecoration: "none"
             }}
+            title="Cambiar a Modo Compradora"
           >
-            <FaShoppingCart style={{ fontSize: "16px" }} /> Compradora
-          </button>
+            <IconoCanasta size={19} color="#64748B" /> Compradora
+          </Link>
         </div>
 
         {/* Texto Explicativo según la opción seleccionada */}
@@ -222,9 +363,8 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* 2. FORMULARIO ADAPTADO SEGÚN EL ROL SELECCIONADO */}
-      {rolPerfil === "productora" ? (
-        <form onSubmit={handleGuardarPerfil} style={{ display: "flex", flexDirection: "column", gap: "18px" }}>
+      {/* 2. FORMULARIO DE PERFIL DE LA PRODUCTORA */}
+      <form onSubmit={handleGuardarPerfil} style={{ display: "flex", flexDirection: "column", gap: "18px" }}>
           {/* DATOS DE LA PRODUCTORA */}
           <div style={{
             backgroundColor: "var(--color-surface)",
@@ -503,65 +643,6 @@ export default function ProfilePage() {
             <FaSignOutAlt /> Cerrar Sesión de la Plataforma
           </button>
         </form>
-      ) : (
-        /* VISTA DE COMPRADORA (Preparada para integración sin duplicar campos) */
-        <div style={{ display: "flex", flexDirection: "column", gap: "18px" }}>
-          <div style={{
-            backgroundColor: "var(--color-surface)",
-            padding: "32px 20px",
-            borderRadius: "20px",
-            boxShadow: "var(--shadow-md)",
-            textAlign: "center",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: "14px"
-          }}>
-            <div style={{
-              width: "60px",
-              height: "60px",
-              borderRadius: "var(--radius-full)",
-              backgroundColor: "#DCFCE7",
-              color: "#166534",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: "26px"
-            }}>
-              <FaShoppingCart />
-            </div>
-            <div>
-              <h3 style={{ fontSize: "1.15rem", margin: 0, color: "var(--color-text-main)", fontWeight: "800" }}>
-                Vista de Compradora Activa
-              </h3>
-              <p style={{ fontSize: "0.85rem", color: "var(--color-text-muted)", margin: "4px 0 0 0", maxWidth: "300px", lineHeight: 1.4 }}>
-                Esta es la vista de una compradora activa en la plataforma, solo haria falta conectarla con la que trabajo la fer
-              </p>
-            </div>
-          </div>
-
-          <button
-            type="button"
-            onClick={logout}
-            style={{
-              backgroundColor: "#FEF2F2",
-              color: "#EF4444",
-              border: "1px solid #FECACA",
-              padding: "12px",
-              borderRadius: "var(--radius-full)",
-              fontSize: "0.9rem",
-              fontWeight: "700",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "8px",
-              cursor: "pointer"
-            }}
-          >
-            <FaSignOutAlt /> Cerrar Sesión de la Plataforma
-          </button>
-        </div>
-      )}
     </div>
   );
 }

@@ -14,11 +14,23 @@ public class ProductoService
         _context = context;
     }
 
-    public async Task<List<ProductoDetalleDto>> GetProductosAsync(string? busqueda = null, int? productoraId = null, int? categoriaId = null)
+    public async Task<List<ProductoDetalleDto>> GetProductosAsync(
+        string? busqueda = null,
+        int? productoraId = null,
+        int? categoriaId = null,
+        bool? soloActivos = null)
     {
-        var query = _context.Productos
-            .AsNoTracking()
-            .Where(p => p.Estado);
+        var query = _context.Productos.AsNoTracking();
+
+        if (soloActivos.HasValue)
+        {
+            query = query.Where(p => p.Estado == soloActivos.Value);
+        }
+        else if (!productoraId.HasValue)
+        {
+            // Catálogo general público: solo productos activos
+            query = query.Where(p => p.Estado);
+        }
 
         if (!string.IsNullOrWhiteSpace(busqueda))
         {
@@ -55,7 +67,8 @@ public class ProductoService
                 ProductoraNombre = string.IsNullOrWhiteSpace(p.Productora.NombreEmprendimiento)
                     ? p.Productora.Usuario.Nombre + " " + p.Productora.Usuario.Apellido
                     : p.Productora.NombreEmprendimiento,
-                ProductoraUbicacion = p.Productora.Ubicacion.Municipio + ", " + p.Productora.Ubicacion.Departamento
+                ProductoraUbicacion = p.Productora.Ubicacion.Municipio + ", " + p.Productora.Ubicacion.Departamento,
+                ProductoraTelefono = p.Productora.Usuario.Telefono
             })
             .ToListAsync();
     }
@@ -84,7 +97,8 @@ public class ProductoService
                 ProductoraNombre = string.IsNullOrWhiteSpace(p.Productora.NombreEmprendimiento)
                     ? p.Productora.Usuario.Nombre + " " + p.Productora.Usuario.Apellido
                     : p.Productora.NombreEmprendimiento,
-                ProductoraUbicacion = p.Productora.Ubicacion.Municipio + ", " + p.Productora.Ubicacion.Departamento
+                ProductoraUbicacion = p.Productora.Ubicacion.Municipio + ", " + p.Productora.Ubicacion.Departamento,
+                ProductoraTelefono = p.Productora.Usuario.Telefono
             })
             .FirstOrDefaultAsync();
     }

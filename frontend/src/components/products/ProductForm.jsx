@@ -1,6 +1,7 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { CATEGORIAS, UNIDADES_MEDIDA } from "../../data/mockData";
+import { getCategorias } from "../../services/categoriaService";
+import { getUnidadesMedida } from "../../services/unidadMedidaService";
 import { FaCamera, FaQuestionCircle, FaExchangeAlt, FaCheck, FaTrashAlt } from "react-icons/fa";
 
 export default function ProductForm({
@@ -10,6 +11,21 @@ export default function ProductForm({
   cargando = false
 }) {
   const esEdicion = Boolean(productoInicial);
+  const [listaCategorias, setListaCategorias] = useState([]);
+  const [listaUnidades, setListaUnidades] = useState([]);
+
+  useEffect(() => {
+    let montado = true;
+    getCategorias().then((cats) => {
+      if (montado && cats?.length) setListaCategorias(cats);
+    });
+    getUnidadesMedida().then((unis) => {
+      if (montado && unis?.length) setListaUnidades(unis);
+    });
+    return () => {
+      montado = false;
+    };
+  }, []);
 
   const [formData, setFormData] = useState({
     nombre: productoInicial?.nombre || "",
@@ -379,7 +395,7 @@ export default function ProductForm({
               paddingRight: "14px"
             }}
           >
-            {CATEGORIAS.map((cat) => (
+            {listaCategorias.map((cat) => (
               <option key={cat.idCategoria} value={cat.idCategoria}>
                 {cat.nombre}
               </option>
@@ -429,7 +445,7 @@ export default function ProductForm({
               paddingRight: "14px"
             }}
           >
-            {UNIDADES_MEDIDA.map((und) => (
+            {listaUnidades.map((und) => (
               <option key={und.idUnidadMedida} value={und.idUnidadMedida}>
                 {und.nombre}
               </option>
