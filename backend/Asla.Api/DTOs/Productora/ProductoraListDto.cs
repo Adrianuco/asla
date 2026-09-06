@@ -11,6 +11,8 @@ public class ProductoraListDto
     public string Municipio { get; set; } = string.Empty;
     public string Departamento { get; set; } = string.Empty;
     public string Ubicacion { get; set; } = string.Empty;
+    public string? Descripcion { get; set; }
+    public string TelefonoWhatsapp { get; set; } = string.Empty;
     public decimal Valoracion { get; set; } = 5.0m;
     public List<string> Etiquetas { get; set; } = new();
     public List<ProductoPreviewDto> ProductosPreview { get; set; } = new();

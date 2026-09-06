@@ -19,9 +19,10 @@ public class ProductoController : ControllerBase
     public async Task<ActionResult<List<ProductoDetalleDto>>> GetProductos(
         [FromQuery] string? busqueda,
         [FromQuery] int? productoraId,
-        [FromQuery] int? categoriaId)
+        [FromQuery] int? categoriaId,
+        [FromQuery] bool? soloActivos)
     {
-        var productos = await _service.GetProductosAsync(busqueda, productoraId, categoriaId);
+        var productos = await _service.GetProductosAsync(busqueda, productoraId, categoriaId, soloActivos);
         return Ok(productos);
     }
 

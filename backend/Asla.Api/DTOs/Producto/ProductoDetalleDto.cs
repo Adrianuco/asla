@@ -21,4 +21,5 @@ public class ProductoDetalleDto
     public int ProductoraId { get; set; }
     public string ProductoraNombre { get; set; } = string.Empty;
     public string ProductoraUbicacion { get; set; } = string.Empty;
+    public string ProductoraTelefono { get; set; } = string.Empty;
 }
