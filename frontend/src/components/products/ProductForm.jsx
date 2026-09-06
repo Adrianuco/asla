@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import { CATEGORIAS, UNIDADES_MEDIDA } from "../../data/mockData";
-import { FaCamera, FaQuestionCircle, FaExchangeAlt, FaCheck, FaTrashAlt } from "react-icons/fa";
+import { FaCamera, FaQuestionCircle, FaExchangeAlt, FaCheck, FaTimes, FaTrashAlt } from "react-icons/fa";
 
 export default function ProductForm({
   productoInicial = null,
@@ -161,7 +161,7 @@ export default function ProductForm({
             lineHeight: 1.4,
             border: "1px solid #FBCFE8"
           }}>
-            💡 Puedes tomar una foto directamente con la cámara de tu celular. Una buena foto ayuda a que los compradores conozcan la calidad de tu cosecha.
+            Puedes tomar una foto directamente con la cámara de tu celular. Una buena foto ayuda a que los compradores conozcan la calidad de tu cosecha.
           </div>
         )}
 
@@ -600,7 +600,7 @@ export default function ProductForm({
               cursor: "pointer"
             }}
           >
-            {!formData.permiteTrueque && <FaCheck />} No
+            {!formData.permiteTrueque && <FaTimes />} No
           </button>
         </div>
       </div>
